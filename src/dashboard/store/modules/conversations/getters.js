@@ -1,4 +1,4 @@
-import authAPI from '../../../api/auth';
+import { MESSAGE_TYPE } from 'shared/constants/messages';
 import { applyPageFilters } from './helpers';
 
 export const getSelectedChatConversation = ({
@@ -9,18 +9,42 @@ export const getSelectedChatConversation = ({
 
 // getters
 const getters = {
-  getAllConversations: ({ allConversations }) =>
-    allConversations.sort(
-      (a, b) => b.messages.last()?.created_at - a.messages.last()?.created_at
-    ),
+  getAllConversations: ({ allConversations, chatSortFilter }) => {
+    const comparator = {
+      latest: (a, b) => b.last_activity_at - a.last_activity_at,
+      sort_on_created_at: (a, b) => a.created_at - b.created_at,
+    };
+
+    return allConversations.sort(comparator[chatSortFilter]);
+  },
   getSelectedChat: ({ selectedChatId, allConversations }) => {
     const selectedChat = allConversations.find(
       conversation => conversation.id === selectedChatId
     );
     return selectedChat || {};
   },
-  getMineChats: _state => activeFilters => {
-    const currentUserID = authAPI.getCurrentUser().id;
+  getLastEmailInSelectedChat: (stage, _getters) => {
+    const selectedChat = _getters.getSelectedChat;
+    const { messages = [] } = selectedChat;
+    const lastEmail = [...messages].reverse().find(message => {
+      const {
+        content_attributes: contentAttributes = {},
+        message_type: messageType,
+      } = message;
+      const { email = {} } = contentAttributes;
+      const isIncomingOrOutgoing =
+        messageType === MESSAGE_TYPE.OUTGOING ||
+        messageType === MESSAGE_TYPE.INCOMING;
+      if (email.from && isIncomingOrOutgoing) {
+        return true;
+      }
+      return false;
+    });
+
+    return lastEmail;
+  },
+  getMineChats: (_state, _, __, rootGetters) => activeFilters => {
+    const currentUserID = rootGetters.getCurrentUser?.id;
 
     return _state.allConversations.filter(conversation => {
       const { assignee } = conversation.meta;
@@ -30,6 +54,9 @@ const getters = {
 
       return isChatMine;
     });
+  },
+  getAppliedConversationFilters: _state => {
+    return _state.appliedFilters;
   },
   getUnAssignedChats: _state => activeFilters => {
     return _state.allConversations.filter(conversation => {
@@ -62,9 +89,18 @@ const getters = {
     ).length;
   },
   getChatStatusFilter: ({ chatStatusFilter }) => chatStatusFilter,
+  getChatSortFilter: ({ chatSortFilter }) => chatSortFilter,
   getSelectedInbox: ({ currentInbox }) => currentInbox,
   getConversationById: _state => conversationId => {
-    return _state.allConversations.find(value => value.id === conversationId);
+    return _state.allConversations.find(
+      value => value.id === Number(conversationId)
+    );
+  },
+  getConversationParticipants: _state => {
+    return _state.conversationParticipants;
+  },
+  getConversationLastSeen: _state => {
+    return _state.conversationLastSeen;
   },
 };
 

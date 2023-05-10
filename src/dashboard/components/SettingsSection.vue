@@ -5,11 +5,17 @@
         {{ title }}
       </p>
       <p class="sub-head">
-        {{ subTitle }}
+        <slot name="subTitle">
+          {{ subTitle }}
+        </slot>
+      </p>
+      <p v-if="note">
+        <span class="note">{{ $t('INBOX_MGMT.NOTE') }}</span>
+        {{ note }}
       </p>
     </div>
     <div class="medium-6 small-12">
-      <slot></slot>
+      <slot />
     </div>
   </div>
 </template>
@@ -24,6 +30,10 @@ export default {
     subTitle: {
       type: String,
       required: true,
+    },
+    note: {
+      type: String,
+      default: '',
     },
   },
 };
@@ -45,6 +55,10 @@ export default {
 
   .title--section {
     padding-right: var(--space-large);
+  }
+
+  .note {
+    font-weight: var(--font-weight-bold);
   }
 }
 </style>

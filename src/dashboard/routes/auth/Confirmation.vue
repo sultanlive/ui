@@ -1,10 +1,10 @@
 <template>
-  <loading-state :message="$t('CONFIRM_EMAIL')"></loading-state>
+  <loading-state :message="$t('CONFIRM_EMAIL')" />
 </template>
 <script>
 import LoadingState from '../../components/widgets/LoadingState';
 import Auth from '../../api/auth';
-import { DEFAULT_REDIRECT_URL } from '../../constants';
+import { DEFAULT_REDIRECT_URL } from 'dashboard/constants/globals';
 export default {
   components: {
     LoadingState,
