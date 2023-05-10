@@ -33,14 +33,7 @@ export default {
     IntegrationHelpText,
   },
   mixins: [globalConfigMixin],
-
-  props: {
-    integrationId: {
-      type: [String, Number],
-      required: true,
-    },
-    code: { type: String, default: '' },
-  },
+  props: ['integrationId', 'code'],
   data() {
     return {
       integrationLoaded: false,

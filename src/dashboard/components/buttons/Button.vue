@@ -1,13 +1,12 @@
 <template>
   <button :type="type" class="button nice" :class="variant" @click="onClick">
-    <fluent-icon
+    <i
       v-if="!isLoading && icon"
       class="icon"
-      :class="buttonIconClass"
-      :icon="icon"
+      :class="buttonIconClass + ' ' + icon"
     />
     <spinner v-if="isLoading" />
-    <slot />
+    <slot></slot>
   </button>
 </template>
 

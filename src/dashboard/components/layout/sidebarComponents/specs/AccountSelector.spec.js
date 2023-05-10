@@ -7,12 +7,10 @@ import i18n from 'dashboard/i18n';
 
 import WootModal from 'dashboard/components/Modal';
 import WootModalHeader from 'dashboard/components/ModalHeader';
-import FluentIcon from 'shared/components/FluentIcon/DashboardIcon';
 
 const localVue = createLocalVue();
 localVue.component('woot-modal', WootModal);
 localVue.component('woot-modal-header', WootModalHeader);
-localVue.component('fluent-icon', FluentIcon);
 
 localVue.use(Vuex);
 localVue.use(VueI18n);
@@ -86,7 +84,7 @@ describe('accountSelctor', () => {
   });
 
   it('first account item is checked', () => {
-    const accountFirstItem = accountSelector.find('.account-selector svg');
+    const accountFirstItem = accountSelector.find('.account-selector .ion');
     expect(accountFirstItem.exists()).toBe(true);
   });
 });

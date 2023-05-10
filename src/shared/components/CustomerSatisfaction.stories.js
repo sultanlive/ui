@@ -13,7 +13,7 @@ const Template = (args, { argTypes }) => ({
   template: '<customer-satisfaction />',
 });
 
-export const Item = Template.bind({});
-Item.args = {
+export const item = Template.bind({});
+item.args = {
   onClick: action('Selected'),
 };

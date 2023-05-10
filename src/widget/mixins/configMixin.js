@@ -1,18 +1,16 @@
+import { mapGetters } from 'vuex';
+
 export default {
   computed: {
-    useInboxAvatarForBot() {
-      return this.channelConfig.enabledFeatures.includes(
-        'use_inbox_avatar_for_bot'
-      );
-    },
+    ...mapGetters({ webChannelConfig: 'appConfig/getWebChannelConfig' }),
     hasAConnectedAgentBot() {
-      return !!window.chatwootWebChannel.hasAConnectedAgentBot;
+      return !!this.webChannelConfig.hasAConnectedAgentBot;
     },
     inboxAvatarUrl() {
-      return window.chatwootWebChannel.avatarUrl;
+      return this.webChannelConfig.avatarUrl;
     },
     channelConfig() {
-      return window.chatwootWebChannel;
+      return this.webChannelConfig;
     },
     hasEmojiPickerEnabled() {
       return this.channelConfig.enabledFeatures.includes('emoji_picker');
@@ -20,28 +18,21 @@ export default {
     hasAttachmentsEnabled() {
       return this.channelConfig.enabledFeatures.includes('attachments');
     },
-    hasEndConversationEnabled() {
-      return this.channelConfig.enabledFeatures.includes('end_conversation');
-    },
     preChatFormEnabled() {
-      return window.chatwootWebChannel.preChatFormEnabled;
+      return this.webChannelConfig.preChatFormEnabled;
     },
     preChatFormOptions() {
+      let requireEmail = false;
       let preChatMessage = '';
-      const options = window.chatwootWebChannel.preChatFormOptions || {};
-      preChatMessage = options.pre_chat_message;
-      const { pre_chat_fields: preChatFields = [] } = options;
+      const options = this.webChannelConfig.preChatFormOptions || {};
+      if (!this.isOnNewConversation) {
+        requireEmail = options.require_email;
+        preChatMessage = options.pre_chat_message;
+      }
       return {
+        requireEmail,
         preChatMessage,
-        preChatFields,
       };
-    },
-    shouldShowPreChatForm() {
-      const { preChatFields } = this.preChatFormOptions;
-      // Check if at least one enabled field in pre-chat fields
-      const hasEnabledFields =
-        preChatFields.filter(field => field.enabled).length > 0;
-      return this.preChatFormEnabled && hasEnabledFields;
     },
   },
 };

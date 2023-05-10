@@ -1,11 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`SidemenuIcon matches snapshot 1`] = `
-<woot-button
-  class="toggle-sidebar"
-  color-scheme="secondary"
-  icon="list"
-  size="small"
-  variant="clear"
+<i
+  class="ion-android-menu hamburger--menu"
 />
 `;

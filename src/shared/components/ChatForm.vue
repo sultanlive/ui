@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="form chat-bubble agent"
-    :class="$dm('bg-white', 'dark:bg-slate-700')"
-  >
+  <div class="form chat-bubble agent">
     <form @submit.prevent="onSubmit">
       <div
         v-for="item in items"
@@ -12,13 +9,10 @@
           'has-submitted': hasSubmitted,
         }"
       >
-        <label :class="$dm('text-black-900', 'dark:text-slate-50')">{{
-          item.label
-        }}</label>
+        <label>{{ item.label }}</label>
         <input
           v-if="item.type === 'email'"
           v-model="formValues[item.name]"
-          :class="inputColor"
           :type="item.type"
           :pattern="item.regex"
           :title="item.title"
@@ -30,7 +24,6 @@
         <input
           v-else-if="item.type === 'text'"
           v-model="formValues[item.name]"
-          :class="inputColor"
           :required="item.required && 'required'"
           :pattern="item.pattern"
           :title="item.title"
@@ -42,7 +35,6 @@
         <textarea
           v-else-if="item.type === 'text_area'"
           v-model="formValues[item.name]"
-          :class="inputColor"
           :required="item.required && 'required'"
           :title="item.title"
           :name="item.name"
@@ -52,7 +44,6 @@
         <select
           v-else-if="item.type === 'select'"
           v-model="formValues[item.name]"
-          :class="inputColor"
           :required="item.required && 'required'"
         >
           <option
@@ -71,11 +62,7 @@
         v-if="!submittedValues.length"
         class="button block"
         type="submit"
-        :style="{
-          background: widgetColor,
-          borderColor: widgetColor,
-          color: textColor,
-        }"
+        :style="{ background: widgetColor, borderColor: widgetColor }"
         @click="onSubmitClick"
       >
         {{ buttonLabel || $t('COMPONENTS.FORM_BUBBLE.SUBMIT') }}
@@ -86,11 +73,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { getContrastingTextColor } from '@chatwoot/utils';
-import darkModeMixin from 'widget/mixins/darkModeMixin';
-
 export default {
-  mixins: [darkModeMixin],
   props: {
     buttonLabel: {
       type: String,
@@ -115,13 +98,6 @@ export default {
     ...mapGetters({
       widgetColor: 'appConfig/getWidgetColor',
     }),
-    textColor() {
-      return getContrastingTextColor(this.widgetColor);
-    },
-    inputColor() {
-      return `${this.$dm('bg-white', 'dark:bg-slate-600')}
-        ${this.$dm('text-black-900', 'dark:text-slate-50')}`;
-    },
     isFormValid() {
       return this.items.reduce((acc, { name }) => {
         return !!this.formValues[name] && acc;
@@ -210,6 +186,7 @@ export default {
     appearance: none;
     border: 1px solid $color-border;
     border-radius: $space-smaller;
+    background-color: $color-white;
     font-family: inherit;
     font-size: $space-normal;
     font-weight: normal;

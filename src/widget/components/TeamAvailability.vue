@@ -1,10 +1,7 @@
 <template>
-  <div class="px-5">
+  <div class="px-4">
     <div class="flex items-center justify-between mb-4">
-      <div
-        class="max-w-xs"
-        :class="$dm('text-black-700', 'dark:text-slate-50')"
-      >
+      <div class="text-black-700">
         <div class="text-base leading-5 font-medium mb-1">
           {{
             isOnline
@@ -13,7 +10,7 @@
           }}
         </div>
         <div class="text-xs leading-4 mt-1">
-          {{ replyWaitMessage }}
+          {{ replyWaitMeessage }}
         </div>
       </div>
       <available-agents v-if="isOnline" :agents="availableAgents" />
@@ -25,9 +22,7 @@
       :text-color="textColor"
       @click="startConversation"
     >
-      {{
-        hasConversation ? $t('CONTINUE_CONVERSATION') : $t('START_CONVERSATION')
-      }}
+      {{ $t('START_CONVERSATION') }}
     </custom-button>
   </div>
 </template>
@@ -39,7 +34,6 @@ import AvailableAgents from 'widget/components/AvailableAgents.vue';
 import CustomButton from 'shared/components/Button';
 import configMixin from 'widget/mixins/configMixin';
 import availabilityMixin from 'widget/mixins/availability';
-import darkMixin from 'widget/mixins/darkModeMixin.js';
 
 export default {
   name: 'TeamAvailability',
@@ -47,22 +41,15 @@ export default {
     AvailableAgents,
     CustomButton,
   },
-  mixins: [configMixin, availabilityMixin, darkMixin],
+  mixins: [configMixin, availabilityMixin],
   props: {
     availableAgents: {
       type: Array,
       default: () => {},
     },
-    hasConversation: {
-      type: Boolean,
-      default: false,
-    },
   },
-
   computed: {
-    ...mapGetters({
-      widgetColor: 'appConfig/getWidgetColor',
-    }),
+    ...mapGetters({ widgetColor: 'appConfig/getWidgetColor' }),
     textColor() {
       return getContrastingTextColor(this.widgetColor);
     },
@@ -75,7 +62,7 @@ export default {
       }
       return anyAgentOnline;
     },
-    replyWaitMessage() {
+    replyWaitMeessage() {
       const { workingHoursEnabled } = this.channelConfig;
 
       if (this.isOnline) {

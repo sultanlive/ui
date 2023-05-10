@@ -11,29 +11,26 @@
       />
     </div>
     <div class="list-scroll-container">
-      <div class="multiselect-dropdown--list">
+      <div class="dropdown-list">
         <woot-dropdown-menu>
           <woot-dropdown-item
             v-for="option in filteredOptions"
             :key="option.id"
           >
             <woot-button
-              class="multiselect-dropdown--item"
-              :variant="isActive(option) ? 'hollow' : 'clear'"
-              color-scheme="secondary"
+              class="dropdown-item"
+              variant="clear"
               :class="{
-                active: isActive(option),
+                active: option.id === (selectedItem && selectedItem.id),
               }"
               @click="() => onclick(option)"
             >
               <div class="user-wrap">
                 <Thumbnail
-                  v-if="hasThumbnail"
                   :src="option.thumbnail"
                   size="24px"
                   :username="option.name"
                   :status="option.availability_status"
-                  has-border
                 />
                 <div class="name-wrap">
                   <span
@@ -42,7 +39,10 @@
                   >
                     {{ option.name }}
                   </span>
-                  <fluent-icon v-if="isActive(option)" icon="checkmark" />
+                  <i
+                    v-if="option.id === (selectedItem && selectedItem.id)"
+                    class="icon ion-checkmark-round"
+                  />
                 </div>
               </div>
             </woot-button>
@@ -60,7 +60,6 @@
 import WootDropdownItem from 'shared/components/ui/dropdown/DropdownItem.vue';
 import WootDropdownMenu from 'shared/components/ui/dropdown/DropdownMenu.vue';
 import Thumbnail from 'dashboard/components/widgets/Thumbnail.vue';
-
 export default {
   components: {
     WootDropdownItem,
@@ -73,13 +72,9 @@ export default {
       type: Array,
       default: () => [],
     },
-    selectedItems: {
-      type: Array,
-      default: () => [],
-    },
-    hasThumbnail: {
-      type: Boolean,
-      default: true,
+    selectedItem: {
+      type: Object,
+      default: () => ({}),
     },
     inputPlaceholder: {
       type: String,
@@ -107,20 +102,16 @@ export default {
       return this.filteredOptions.length === 0 && this.search !== '';
     },
   },
-
   mounted() {
     this.focusInput();
   },
-
   methods: {
     onclick(option) {
       this.$emit('click', option);
     },
+
     focusInput() {
       this.$refs.searchbar.focus();
-    },
-    isActive(option) {
-      return this.selectedItems.some(item => item && option.id === item.id);
     },
   },
 };
@@ -131,7 +122,7 @@ export default {
   width: 100%;
   display: flex;
   flex-direction: column;
-  max-height: 20rem;
+  max-height: 16rem;
 }
 
 .search-wrap {
@@ -162,28 +153,17 @@ export default {
   overflow: auto;
 }
 
-.multiselect-dropdown--list {
+.dropdown-list {
   width: 100%;
-  max-height: 16rem;
+  max-height: 12rem;
 }
 
-.multiselect-dropdown--item {
+.dropdown-item {
   justify-content: space-between;
   width: 100%;
 
   &.active {
-    background: var(--s-25);
-    border-color: var(--s-50);
-    font-weight: var(--font-weight-medium);
-  }
-
-  &:focus {
-    background-color: var(--color-background-light);
-  }
-
-  &:hover {
-    color: var(--s-800);
-    background-color: var(--color-background);
+    font-weight: var(--font-weight-bold);
   }
 }
 
@@ -195,10 +175,8 @@ export default {
 .name-wrap {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   min-width: 0;
   width: 100%;
-  align-items: center;
 }
 
 .name {

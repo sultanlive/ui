@@ -24,14 +24,14 @@
             </td>
             <td class="button-wrapper">
               <woot-button
-                v-tooltip.top="$t('INTEGRATION_APPS.LIST.DELETE.BUTTON_TEXT')"
-                variant="smooth"
-                color-scheme="alert"
-                size="tiny"
-                icon="dismiss-circle"
+                variant="link"
+                color-scheme="secondary"
+                icon="ion-close-circled"
                 class-names="grey-btn"
                 @click="$emit('delete', hook)"
-              />
+              >
+                {{ $t('INTEGRATION_APPS.LIST.DELETE.BUTTON_TEXT') }}
+              </woot-button>
             </td>
           </tr>
         </tbody>
@@ -49,7 +49,7 @@
         <b>{{ integration.name }}</b>
       </p>
       <p
-        v-dompurify-html="
+        v-html="
           $t(
             `INTEGRATION_APPS.SIDEBAR_DESCRIPTION.${integration.name.toUpperCase()}`,
             { installationName: globalConfig.installationName }

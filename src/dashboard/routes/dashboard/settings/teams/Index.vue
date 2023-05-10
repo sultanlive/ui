@@ -27,25 +27,25 @@
                   >
                     <woot-button
                       v-if="isAdmin"
-                      v-tooltip.top="$t('TEAMS_SETTINGS.LIST.EDIT_TEAM')"
-                      variant="smooth"
-                      size="tiny"
+                      variant="link"
                       color-scheme="secondary"
                       class-names="grey-btn"
-                      icon="settings"
-                    />
+                      icon="ion-gear-b"
+                    >
+                      {{ $t('TEAMS_SETTINGS.LIST.EDIT_TEAM') }}
+                    </woot-button>
                   </router-link>
                   <woot-button
                     v-if="isAdmin"
-                    v-tooltip.top="$t('TEAMS_SETTINGS.DELETE.BUTTON_TEXT')"
-                    variant="smooth"
-                    color-scheme="alert"
-                    size="tiny"
-                    icon="dismiss-circle"
+                    variant="link"
+                    color-scheme="secondary"
+                    icon="ion-close-circled"
                     class-names="grey-btn"
                     :is-loading="loading[item.id]"
                     @click="openDelete(item)"
-                  />
+                  >
+                    {{ $t('TEAMS_SETTINGS.DELETE.BUTTON_TEXT') }}
+                  </woot-button>
                 </div>
               </td>
             </tr>
@@ -55,7 +55,7 @@
 
       <div class="small-4 columns">
         <span
-          v-dompurify-html="
+          v-html="
             $t('TEAMS_SETTINGS.SIDEBAR_TXT', {
               installationName: globalConfig.installationName,
             })
@@ -64,7 +64,6 @@
       </div>
     </div>
     <woot-confirm-delete-modal
-      v-if="showDeletePopup"
       :show.sync="showDeletePopup"
       :title="confirmDeleteTitle"
       :message="$t('TEAMS_SETTINGS.DELETE.CONFIRM.MESSAGE')"

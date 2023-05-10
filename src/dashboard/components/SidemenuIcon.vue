@@ -1,27 +1,18 @@
 <template>
-  <woot-button
-    size="small"
-    variant="clear"
-    color-scheme="secondary"
-    icon="list"
-    class="toggle-sidebar"
-    @click="onMenuItemClick"
-  />
+  <i class="ion-android-menu hamburger--menu" @click="onMenuItemClick" />
 </template>
 
 <script>
-import { BUS_EVENTS } from 'shared/constants/busEvents';
-
 export default {
   methods: {
     onMenuItemClick() {
-      bus.$emit(BUS_EVENTS.TOGGLE_SIDEMENU);
+      bus.$emit('sidemenu_icon_click');
     },
   },
 };
 </script>
-<style scoped lang="scss">
-.toggle-sidebar {
-  margin-left: var(--space-minus-small);
+<style lang="scss" scoped>
+.ion-android-menu {
+  font-size: var(--font-size-big);
 }
 </style>

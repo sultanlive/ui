@@ -6,127 +6,43 @@ commonHelpers();
 
 describe('#getters', () => {
   describe('#getAllConversations', () => {
-    it('order conversations based on last activity', () => {
+    it('order conversations based on last message date', () => {
       const state = {
         allConversations: [
           {
             id: 1,
             messages: [
               {
-                content: 'test1',
+                created_at: 1466424480,
               },
             ],
-            created_at: 2466424490,
-            last_activity_at: 2466424490,
           },
           {
             id: 2,
-            messages: [{ content: 'test2' }],
-            created_at: 1466424480,
-            last_activity_at: 1466424480,
-          },
-        ],
-      };
-
-      expect(getters.getAllConversations(state)).toEqual([
-        {
-          id: 1,
-          messages: [
-            {
-              content: 'test1',
-            },
-          ],
-          created_at: 2466424490,
-          last_activity_at: 2466424490,
-        },
-        {
-          id: 2,
-          messages: [{ content: 'test2' }],
-          created_at: 1466424480,
-          last_activity_at: 1466424480,
-        },
-      ]);
-    });
-    it('order conversations based on created at', () => {
-      const state = {
-        allConversations: [
-          {
-            id: 1,
             messages: [
               {
-                content: 'test1',
+                created_at: 2466424490,
               },
             ],
-            created_at: 1683645801, // Tuesday, 9 May 2023
-            last_activity_at: 2466424490,
-          },
-          {
-            id: 2,
-            messages: [{ content: 'test2' }],
-            created_at: 1652109801, // Monday, 9 May 2022
-            last_activity_at: 1466424480,
           },
         ],
-        chatSortFilter: 'sort_on_created_at',
       };
-
       expect(getters.getAllConversations(state)).toEqual([
         {
           id: 2,
-          messages: [{ content: 'test2' }],
-          created_at: 1652109801,
-          last_activity_at: 1466424480,
+          messages: [
+            {
+              created_at: 2466424490,
+            },
+          ],
         },
         {
           id: 1,
           messages: [
             {
-              content: 'test1',
+              created_at: 1466424480,
             },
           ],
-          created_at: 1683645801,
-          last_activity_at: 2466424490,
-        },
-      ]);
-    });
-    it('order conversations based on default order', () => {
-      const state = {
-        allConversations: [
-          {
-            id: 1,
-            messages: [
-              {
-                content: 'test1',
-              },
-            ],
-            created_at: 2466424490,
-            last_activity_at: 2466424490,
-          },
-          {
-            id: 2,
-            messages: [{ content: 'test2' }],
-            created_at: 1466424480,
-            last_activity_at: 1466424480,
-          },
-        ],
-      };
-
-      expect(getters.getAllConversations(state)).toEqual([
-        {
-          id: 1,
-          messages: [
-            {
-              content: 'test1',
-            },
-          ],
-          created_at: 2466424490,
-          last_activity_at: 2466424490,
-        },
-        {
-          id: 2,
-          messages: [{ content: 'test2' }],
-          created_at: 1466424480,
-          last_activity_at: 1466424480,
         },
       ]);
     });
@@ -196,53 +112,6 @@ describe('#getters', () => {
         ],
       };
       expect(getters.getConversationById(state)(1)).toEqual({ id: 1 });
-    });
-  });
-
-  describe('#getAppliedConversationFilters', () => {
-    it('getAppliedConversationFilters', () => {
-      const filtersList = [
-        {
-          attribute_key: 'status',
-          filter_operator: 'equal_to',
-          values: [{ id: 'snoozed', name: 'Snoozed' }],
-          query_operator: 'and',
-        },
-      ];
-      const state = {
-        appliedFilters: filtersList,
-      };
-      expect(getters.getAppliedConversationFilters(state)).toEqual(filtersList);
-    });
-  });
-
-  describe('#getLastEmailInSelectedChat', () => {
-    it('Returns cc in last email', () => {
-      const state = {};
-      const getSelectedChat = {
-        messages: [
-          {
-            message_type: 1,
-            content_attributes: {
-              email: {
-                from: 'why@how.my',
-                cc: ['nithin@me.co', 'we@who.why'],
-              },
-            },
-          },
-        ],
-      };
-      expect(
-        getters.getLastEmailInSelectedChat(state, { getSelectedChat })
-      ).toEqual({
-        message_type: 1,
-        content_attributes: {
-          email: {
-            from: 'why@how.my',
-            cc: ['nithin@me.co', 'we@who.why'],
-          },
-        },
-      });
     });
   });
 });

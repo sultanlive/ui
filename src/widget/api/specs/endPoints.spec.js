@@ -47,10 +47,6 @@ describe('#getConversation', () => {
 
 describe('#triggerCampaign', () => {
   it('should returns correct payload', () => {
-    const spy = jest.spyOn(global, 'Date').mockImplementation(() => ({
-      toString: () => 'mock date',
-    }));
-    const windowSpy = jest.spyOn(window, 'window', 'get');
     const websiteToken = 'ADSDJ2323MSDSDFMMMASDM';
     const campaignId = 12;
     expect(
@@ -64,18 +60,11 @@ describe('#triggerCampaign', () => {
         name: 'campaign.triggered',
         event_info: {
           campaign_id: campaignId,
-          referer: '',
-          initiated_at: {
-            timestamp: 'mock date',
-          },
         },
       },
       params: {
         website_token: websiteToken,
       },
     });
-    windowSpy.mockRestore();
-
-    spy.mockRestore();
   });
 });

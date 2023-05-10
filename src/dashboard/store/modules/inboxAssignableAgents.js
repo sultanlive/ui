@@ -1,6 +1,6 @@
 import Vue from 'vue';
 
-import AssignableAgentsAPI from '../../api/assignableAgents';
+import InboxesAPI from 'dashboard/api/inboxes.js';
 
 const state = {
   records: {},
@@ -26,16 +26,13 @@ export const getters = {
 };
 
 export const actions = {
-  async fetch({ commit }, inboxIds) {
+  async fetch({ commit }, { inboxId }) {
     commit(types.SET_INBOX_ASSIGNABLE_AGENTS_UI_FLAG, { isFetching: true });
     try {
       const {
         data: { payload },
-      } = await AssignableAgentsAPI.get(inboxIds);
-      commit(types.SET_INBOX_ASSIGNABLE_AGENTS, {
-        inboxId: inboxIds.join(','),
-        members: payload,
-      });
+      } = await InboxesAPI.getAssignableAgents(inboxId);
+      commit(types.SET_INBOX_ASSIGNABLE_AGENTS, { inboxId, members: payload });
     } catch (error) {
       throw new Error(error);
     } finally {

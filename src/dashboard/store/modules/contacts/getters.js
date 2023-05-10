@@ -12,7 +12,4 @@ export const getters = {
   getMeta: $state => {
     return $state.meta;
   },
-  getAppliedContactFilters: _state => {
-    return _state.appliedFilters;
-  },
 };

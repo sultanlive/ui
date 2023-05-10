@@ -1,19 +1,50 @@
 <template>
-  <div class="search-wrap">
+  <div v-on-clickaway="closeSearch" class="search-wrap">
     <div class="search" :class="{ 'is-active': showSearchBox }">
       <woot-sidemenu-icon />
-      <router-link :to="searchUrl" class="search--link">
-        <div class="icon">
-          <fluent-icon icon="search" class="search--icon" size="16" />
-        </div>
-        <p class="search--label text-ellipsis">
-          {{ $t('CONVERSATION.SEARCH_MESSAGES') }}
-        </p>
-      </router-link>
-      <switch-layout
-        :is-on-expanded-layout="isOnExpandedLayout"
-        @toggle="$emit('toggle-conversation-layout')"
+      <div class="icon">
+        <i class="ion-ios-search-strong search--icon" />
+      </div>
+      <input
+        v-model="searchTerm"
+        class="search--input"
+        :placeholder="$t('CONVERSATION.SEARCH_MESSAGES')"
+        @focus="onSearch"
       />
+    </div>
+    <div v-if="showSearchBox" class="results-wrap">
+      <div class="show-results">
+        <div>
+          <div class="result-view">
+            <div class="result">
+              Search Results
+              <span v-if="resultsCount" class="message-counter">
+                ({{ resultsCount }})
+              </span>
+            </div>
+            <div v-if="uiFlags.isFetching" class="search--activity-message">
+              <woot-spinner size="" />
+              {{ $t('CONVERSATION.SEARCH.LOADING_MESSAGE') }}
+            </div>
+          </div>
+
+          <div v-if="showSearchResult" class="search-results--container">
+            <result-item
+              v-for="conversation in conversations"
+              :key="conversation.messageId"
+              :conversation-id="conversation.id"
+              :user-name="conversation.contact.name"
+              :timestamp="conversation.created_at"
+              :messages="conversation.messages"
+              :search-term="searchTerm"
+              :inbox-name="conversation.inbox.name"
+            />
+          </div>
+          <div v-else-if="showEmptyResult" class="search--activity-no-message">
+            {{ $t('CONVERSATION.SEARCH.NO_MATCHING_RESULTS') }}
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -22,13 +53,14 @@
 import { mixin as clickaway } from 'vue-clickaway';
 import { mapGetters } from 'vuex';
 import timeMixin from '../../../../mixins/time';
+import ResultItem from './ResultItem';
 import messageFormatterMixin from 'shared/mixins/messageFormatterMixin';
-import SwitchLayout from './SwitchLayout.vue';
-import { frontendURL } from 'dashboard/helper/URLHelper';
+
 export default {
   components: {
-    SwitchLayout,
+    ResultItem,
   },
+
   directives: {
     focus: {
       inserted(el) {
@@ -36,13 +68,8 @@ export default {
       },
     },
   },
+
   mixins: [timeMixin, messageFormatterMixin, clickaway],
-  props: {
-    isOnExpandedLayout: {
-      type: Boolean,
-      required: true,
-    },
-  },
 
   data() {
     return {
@@ -53,10 +80,59 @@ export default {
 
   computed: {
     ...mapGetters({
-      accountId: 'getCurrentAccountId',
+      conversations: 'conversationSearch/getConversations',
+      uiFlags: 'conversationSearch/getUIFlags',
+      currentPage: 'conversationPage/getCurrentPage',
     }),
-    searchUrl() {
-      return frontendURL(`accounts/${this.accountId}/search`);
+    resultsCount() {
+      return this.conversations.length;
+    },
+    showSearchResult() {
+      return (
+        this.searchTerm && this.conversations.length && !this.uiFlags.isFetching
+      );
+    },
+    showEmptyResult() {
+      return (
+        this.searchTerm &&
+        !this.conversations.length &&
+        !this.uiFlags.isFetching
+      );
+    },
+  },
+
+  watch: {
+    searchTerm(newValue) {
+      if (this.typingTimer) {
+        clearTimeout(this.typingTimer);
+      }
+
+      this.typingTimer = setTimeout(() => {
+        this.hasSearched = true;
+        this.$store.dispatch('conversationSearch/get', { q: newValue });
+      }, 1000);
+    },
+    currentPage() {
+      this.clearSearchTerm();
+    },
+  },
+
+  mounted() {
+    this.$store.dispatch('conversationSearch/get', { q: '' });
+    bus.$on('clearSearchInput', () => {
+      this.clearSearchTerm();
+    });
+  },
+
+  methods: {
+    onSearch() {
+      this.showSearchBox = true;
+    },
+    closeSearch() {
+      this.showSearchBox = false;
+    },
+    clearSearchTerm() {
+      this.searchTerm = '';
     },
   },
 };
@@ -75,27 +151,10 @@ export default {
     var(--space-normal);
 
   &:hover {
-    .search--icon,
-    .search--label {
+    .search--icon {
       color: var(--w-500);
     }
   }
-}
-
-.search--link {
-  display: inline-flex;
-  align-items: center;
-  flex: 1;
-  background: var(--s-25);
-  padding: var(--space-smaller);
-  height: var(--space-medium);
-  border-radius: var(--border-radius-normal);
-  margin-right: var(--space-smaller);
-}
-
-.search--label {
-  color: var(--color-body);
-  margin-bottom: 0;
 }
 
 .search--input {
@@ -113,7 +172,8 @@ export default {
 
 .search--icon {
   color: var(--s-600);
-  margin: 0 var(--space-smaller);
+  font-size: var(--font-size-large);
+  padding: 0 var(--space-small) 0 0;
 }
 
 .icon {

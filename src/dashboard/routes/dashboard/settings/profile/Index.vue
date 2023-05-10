@@ -14,17 +14,6 @@
             :src="avatarUrl"
             @change="handleImageUpload"
           />
-          <div v-if="showDeleteButton" class="avatar-delete-btn">
-            <woot-button
-              type="button"
-              color-scheme="alert"
-              variant="hollow"
-              size="small"
-              @click="deleteAvatar"
-            >
-              {{ $t('PROFILE_SETTINGS.DELETE_AVATAR') }}
-            </woot-button>
-          </div>
           <label :class="{ error: $v.name.$error }">
             {{ $t('PROFILE_SETTINGS.FORM.NAME.LABEL') }}
             <input
@@ -48,10 +37,7 @@
               @input="$v.displayName.$touch"
             />
           </label>
-          <label
-            v-if="!globalConfig.disableUserProfileUpdate"
-            :class="{ error: $v.email.$error }"
-          >
+          <label :class="{ error: $v.email.$error }">
             {{ $t('PROFILE_SETTINGS.FORM.EMAIL.LABEL') }}
             <input
               v-model.trim="email"
@@ -69,50 +55,17 @@
         </div>
       </div>
     </form>
-    <message-signature />
-    <div class="profile--settings--row row">
-      <div class="columns small-3">
-        <h4 class="block-title">
-          {{ $t('PROFILE_SETTINGS.FORM.SEND_MESSAGE.TITLE') }}
-        </h4>
-        <p>
-          {{ $t('PROFILE_SETTINGS.FORM.SEND_MESSAGE.NOTE') }}
-        </p>
-      </div>
-      <div class="columns small-9 medium-5 card-preview">
-        <button
-          v-for="keyOption in keyOptions"
-          :key="keyOption.key"
-          class="preview-button"
-          @click="toggleEditorMessageKey(keyOption.key)"
-        >
-          <preview-card
-            :heading="keyOption.heading"
-            :content="keyOption.content"
-            :src="keyOption.src"
-            :active="isEditorHotKeyEnabled(uiSettings, keyOption.key)"
-          />
-        </button>
-      </div>
-    </div>
-    <change-password v-if="!globalConfig.disableUserProfileUpdate" />
+    <change-password />
     <notification-settings />
     <div class="profile--settings--row row">
       <div class="columns small-3">
         <h4 class="block-title">
           {{ $t('PROFILE_SETTINGS.FORM.ACCESS_TOKEN.TITLE') }}
         </h4>
-        <p>
-          {{
-            useInstallationName(
-              $t('PROFILE_SETTINGS.FORM.ACCESS_TOKEN.NOTE'),
-              globalConfig.installationName
-            )
-          }}
-        </p>
+        <p>{{ $t('PROFILE_SETTINGS.FORM.ACCESS_TOKEN.NOTE') }}</p>
       </div>
       <div class="columns small-9 medium-5">
-        <masked-text :value="currentUser.access_token" />
+        <woot-code :script="currentUser.access_token"></woot-code>
       </div>
     </div>
   </div>
@@ -124,24 +77,14 @@ import { mapGetters } from 'vuex';
 import { clearCookiesOnLogout } from '../../../../store/utils/api';
 import NotificationSettings from './NotificationSettings';
 import alertMixin from 'shared/mixins/alertMixin';
-import ChangePassword from './ChangePassword';
-import MessageSignature from './MessageSignature';
-import globalConfigMixin from 'shared/mixins/globalConfigMixin';
-import uiSettingsMixin, {
-  isEditorHotKeyEnabled,
-} from 'dashboard/mixins/uiSettings';
-import MaskedText from 'dashboard/components/MaskedText.vue';
-import PreviewCard from 'dashboard/components/ui/PreviewCard.vue';
+import ChangePassword from './ChangePassword.vue';
 
 export default {
   components: {
     NotificationSettings,
     ChangePassword,
-    MessageSignature,
-    PreviewCard,
-    MaskedText,
   },
-  mixins: [alertMixin, globalConfigMixin, uiSettingsMixin],
+  mixins: [alertMixin],
   data() {
     return {
       avatarFile: '',
@@ -151,28 +94,6 @@ export default {
       email: '',
       isProfileUpdating: false,
       errorMessage: '',
-      keyOptions: [
-        {
-          key: 'enter',
-          src: '/assets/images/dashboard/editor/enter-editor.png',
-          heading: this.$t(
-            'PROFILE_SETTINGS.FORM.SEND_MESSAGE.CARD.ENTER_KEY.HEADING'
-          ),
-          content: this.$t(
-            'PROFILE_SETTINGS.FORM.SEND_MESSAGE.CARD.ENTER_KEY.CONTENT'
-          ),
-        },
-        {
-          key: 'cmd_enter',
-          src: '/assets/images/dashboard/editor/cmd-editor.png',
-          heading: this.$t(
-            'PROFILE_SETTINGS.FORM.SEND_MESSAGE.CARD.CMD_ENTER_KEY.HEADING'
-          ),
-          content: this.$t(
-            'PROFILE_SETTINGS.FORM.SEND_MESSAGE.CARD.CMD_ENTER_KEY.CONTENT'
-          ),
-        },
-      ],
     };
   },
   validations: {
@@ -190,7 +111,6 @@ export default {
     ...mapGetters({
       currentUser: 'getCurrentUser',
       currentUserId: 'getCurrentUserID',
-      globalConfig: 'globalConfig/get',
     }),
   },
   watch: {
@@ -212,7 +132,6 @@ export default {
       this.avatarUrl = this.currentUser.avatar_url;
       this.displayName = this.currentUser.display_name;
     },
-    isEditorHotKeyEnabled,
     async updateUser() {
       this.$v.$touch();
       if (this.$v.$invalid) {
@@ -249,25 +168,6 @@ export default {
       this.avatarFile = file;
       this.avatarUrl = url;
     },
-    async deleteAvatar() {
-      try {
-        await this.$store.dispatch('deleteAvatar');
-        this.avatarUrl = '';
-        this.avatarFile = '';
-        this.showAlert(this.$t('PROFILE_SETTINGS.AVATAR_DELETE_SUCCESS'));
-      } catch (error) {
-        this.showAlert(this.$t('PROFILE_SETTINGS.AVATAR_DELETE_FAILED'));
-      }
-    },
-    showDeleteButton() {
-      return this.avatarUrl && !this.avatarUrl.includes('www.gravatar.com');
-    },
-    toggleEditorMessageKey(key) {
-      this.updateUISettings({ editor_message_key: key });
-      this.showAlert(
-        this.$t('PROFILE_SETTINGS.FORM.SEND_MESSAGE.UPDATE_SUCCESS')
-      );
-    },
   },
 };
 </script>
@@ -277,32 +177,18 @@ export default {
 @import '~dashboard/assets/scss/mixins.scss';
 
 .profile--settings {
-  overflow: auto;
   padding: 24px;
+  overflow: auto;
 }
 
 .profile--settings--row {
   @include border-normal-bottom;
-  align-items: center;
-  display: flex;
   padding: $space-normal;
-
   .small-3 {
     padding: $space-normal $space-medium $space-normal 0;
   }
-
   .small-9 {
     padding: $space-normal;
-  }
-
-  .card-preview {
-    display: flex;
-    flex-direction: row;
-
-    .preview-button {
-      cursor: pointer;
-      margin-right: var(--space-normal);
-    }
   }
 }
 </style>

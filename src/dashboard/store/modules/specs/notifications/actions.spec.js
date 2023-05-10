@@ -90,12 +90,4 @@ describe('#actions', () => {
       await expect(actions.readAll({ commit })).rejects.toThrow(Error);
     });
   });
-  describe('#addNotification', () => {
-    it('sends correct actions if API is success', async () => {
-      await actions.addNotification({ commit }, { data: 1 });
-      expect(commit.mock.calls).toEqual([
-        [types.ADD_NOTIFICATION, { data: 1 }],
-      ]);
-    });
-  });
 });

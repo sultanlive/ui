@@ -36,7 +36,7 @@
         variant="clear link"
         size="small"
         color-scheme="secondary"
-        icon="edit"
+        icon="ion-compose"
         class-names="edit-button"
         @click="onEdit"
       />

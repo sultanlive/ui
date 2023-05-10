@@ -4,7 +4,6 @@ import * as types from '../../../mutation-types';
 import agentList from './fixtures';
 
 const commit = jest.fn();
-const dispatch = jest.fn();
 global.axios = axios;
 jest.mock('axios');
 
@@ -96,21 +95,13 @@ describe('#actions', () => {
   });
 
   describe('#updatePresence', () => {
-    it('sends correct actions', async () => {
+    it('sends correct actions if API is success', async () => {
       const data = { users: { 1: 'online' }, contacts: { 2: 'online' } };
-      actions.updatePresence({ commit, dispatch }, data);
+      actions.updatePresence({ commit }, data);
       expect(commit.mock.calls).toEqual([
+        [types.default.SET_AGENT_UPDATING_STATUS, true],
         [types.default.UPDATE_AGENTS_PRESENCE, data],
-      ]);
-    });
-  });
-
-  describe('#updateSingleAgentPresence', () => {
-    it('sends correct actions', async () => {
-      const data = { id: 1, availabilityStatus: 'online' };
-      actions.updateSingleAgentPresence({ commit, dispatch }, data);
-      expect(commit.mock.calls).toEqual([
-        [types.default.UPDATE_SINGLE_AGENT_PRESENCE, data],
+        [types.default.SET_AGENT_UPDATING_STATUS, false],
       ]);
     });
   });

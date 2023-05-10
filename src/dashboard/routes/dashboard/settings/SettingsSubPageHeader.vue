@@ -3,15 +3,15 @@
     <h2 class="page-sub-title">
       {{ headerTitle }}
     </h2>
-    <p v-dompurify-html="headerContent" class="small-12 column" />
+    <p class="small-12 column" v-html="headerContent"></p>
   </div>
 </template>
 
 <script>
 export default {
   props: {
-    headerTitle: { type: String, default: '' },
-    headerContent: { type: String, default: '' },
+    headerTitle: String,
+    headerContent: String,
   },
 };
 </script>

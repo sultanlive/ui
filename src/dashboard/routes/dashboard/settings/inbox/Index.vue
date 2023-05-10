@@ -2,7 +2,7 @@
   <div class="column content-box">
     <!-- List Canned Response -->
     <div class="row">
-      <div class="small-8 columns with-right-space">
+      <div class="small-8 columns with-right-space ">
         <p v-if="!inboxesList.length" class="no-items-error-message">
           {{ $t('INBOX_MGMT.LIST.404') }}
           <router-link
@@ -43,21 +43,11 @@
                   Twitter
                 </span>
                 <span v-if="item.channel_type === 'Channel::TwilioSms'">
-                  {{ twilioChannelName(item) }}
-                </span>
-                <span v-if="item.channel_type === 'Channel::Whatsapp'">
-                  Whatsapp
-                </span>
-                <span v-if="item.channel_type === 'Channel::Sms'">
-                  Sms
+                  Twilio SMS
                 </span>
                 <span v-if="item.channel_type === 'Channel::Email'">
                   Email
                 </span>
-                <span v-if="item.channel_type === 'Channel::Telegram'">
-                  Telegram
-                </span>
-                <span v-if="item.channel_type === 'Channel::Line'">Line</span>
                 <span v-if="item.channel_type === 'Channel::Api'">
                   {{ globalConfig.apiChannelName || 'API' }}
                 </span>
@@ -71,26 +61,26 @@
                   >
                     <woot-button
                       v-if="isAdmin"
-                      v-tooltip.top="$t('INBOX_MGMT.SETTINGS')"
-                      variant="smooth"
-                      size="tiny"
-                      icon="settings"
+                      icon="ion-gear-b"
+                      variant="link"
                       color-scheme="secondary"
                       class-names="grey-btn"
-                    />
+                    >
+                      {{ $t('INBOX_MGMT.SETTINGS') }}
+                    </woot-button>
                   </router-link>
 
                   <woot-button
                     v-if="isAdmin"
-                    v-tooltip.top="$t('INBOX_MGMT.DELETE.BUTTON_TEXT')"
-                    variant="smooth"
-                    color-scheme="alert"
-                    size="tiny"
+                    variant="link"
+                    color-scheme="secondary"
                     class-names="grey-btn"
                     :is-loading="loading[item.id]"
-                    icon="dismiss-circle"
+                    icon="ion-close-circled"
                     @click="openDelete(item)"
-                  />
+                  >
+                    {{ $t('INBOX_MGMT.DELETE.BUTTON_TEXT') }}
+                  </woot-button>
                 </div>
               </td>
             </tr>
@@ -100,7 +90,7 @@
 
       <div class="small-4 columns">
         <span
-          v-dompurify-html="
+          v-html="
             useInstallationName(
               $t('INBOX_MGMT.SIDEBAR_TXT'),
               globalConfig.installationName
@@ -117,7 +107,6 @@
     />
 
     <woot-confirm-delete-modal
-      v-if="showDeletePopup"
       :show.sync="showDeletePopup"
       :title="$t('INBOX_MGMT.DELETE.CONFIRM.TITLE')"
       :message="confirmDeleteMessage"
@@ -178,11 +167,6 @@ export default {
     },
   },
   methods: {
-    twilioChannelName(item) {
-      const { medium = '' } = item;
-      if (medium === 'whatsapp') return 'WhatsApp';
-      return 'Twilio SMS';
-    },
     openSettings(inbox) {
       this.showSettings = true;
       this.selectedInbox = inbox;

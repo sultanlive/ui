@@ -1,15 +1,20 @@
 import VueRouter from 'vue-router';
 
-import { frontendURL } from '../helper/URLHelper';
-import { clearBrowserSessionCookies } from '../store/utils/api';
-import authRoute from './auth/auth.routes';
-import dashboard from './dashboard/dashboard.routes';
+import auth from '../api/auth';
 import login from './login/login.routes';
-import store from '../store';
-import { validateLoggedInRoutes } from '../helper/routeHelpers';
-import AnalyticsHelper from '../helper/AnalyticsHelper';
+import dashboard from './dashboard/dashboard.routes';
+import authRoute from './auth/auth.routes';
+import { frontendURL } from '../helper/URLHelper';
 
-const routes = [...login.routes, ...dashboard.routes, ...authRoute.routes];
+const routes = [
+  ...login.routes,
+  ...dashboard.routes,
+  ...authRoute.routes,
+  {
+    path: '/',
+    redirect: '/app',
+  },
+];
 
 window.roleWiseRoutes = {
   agent: [],
@@ -42,17 +47,17 @@ const authIgnoreRoutes = [
   'auth_confirmation',
   'pushBack',
   'auth_password_edit',
-  'oauth-callback',
 ];
+
+function routeIsAccessibleFor(route, role) {
+  return window.roleWiseRoutes[role].includes(route);
+}
 
 const routeValidators = [
   {
     protected: false,
     loggedIn: true,
-    handler: (_, getters) => {
-      const user = getters.getCurrentUser;
-      return `accounts/${user.account_id}/dashboard`;
-    },
+    handler: () => 'dashboard',
   },
   {
     protected: true,
@@ -62,8 +67,11 @@ const routeValidators = [
   {
     protected: true,
     loggedIn: true,
-    handler: (to, getters) =>
-      validateLoggedInRoutes(to, getters.getCurrentUser, window.roleWiseRoutes),
+    handler: to => {
+      const user = auth.getCurrentUser();
+      const isAccessible = routeIsAccessibleFor(to, user.role);
+      return isAccessible ? null : 'dashboard';
+    },
   },
   {
     protected: false,
@@ -72,77 +80,45 @@ const routeValidators = [
   },
 ];
 
-export const validateAuthenticateRoutePermission = (
-  to,
-  from,
-  next,
-  { getters }
-) => {
-  const isLoggedIn = getters.isLoggedIn;
+export const validateAuthenticateRoutePermission = (to, from, next) => {
+  const isLoggedIn = auth.isLoggedIn();
   const isProtectedRoute = !unProtectedRoutes.includes(to.name);
   const strategy = routeValidators.find(
     validator =>
       validator.protected === isProtectedRoute &&
       validator.loggedIn === isLoggedIn
   );
-  const nextRoute = strategy.handler(to, getters);
+  const nextRoute = strategy.handler(to.name);
   return nextRoute ? next(frontendURL(nextRoute)) : next();
 };
 
-const validateSSOLoginParams = to => {
-  const isLoginRoute = to.name === 'login';
-  const { email, sso_auth_token: ssoAuthToken } = to.query || {};
-  const hasValidSSOParams = email && ssoAuthToken;
-  return isLoginRoute && hasValidSSOParams;
-};
-
-export const validateRouteAccess = (to, from, next, { getters }) => {
-  // Disable navigation to signup page if signups are disabled
-  // Signup route has an attribute (requireSignupEnabled)
-  // defined in it's route definition
+const validateRouteAccess = (to, from, next) => {
   if (
     window.chatwootConfig.signupEnabled !== 'true' &&
     to.meta &&
     to.meta.requireSignupEnabled
   ) {
-    return next(frontendURL('login'));
+    const user = auth.getCurrentUser();
+    next(frontendURL(`accounts/${user.account_id}/dashboard`));
   }
 
-  // For routes which doesn't care about authentication, skip validation
   if (authIgnoreRoutes.includes(to.name)) {
     return next();
   }
-
-  return validateAuthenticateRoutePermission(to, from, next, { getters });
+  return validateAuthenticateRoutePermission(to, from, next);
 };
 
-export const initalizeRouter = () => {
-  const userAuthentication = store.dispatch('setUser');
-
-  router.beforeEach((to, from, next) => {
-    AnalyticsHelper.page(to.name || '', {
-      path: to.path,
-      name: to.name,
-    });
-
-    if (validateSSOLoginParams(to)) {
-      clearBrowserSessionCookies();
-      next();
-      return;
+// protecting routes
+router.beforeEach((to, from, next) => {
+  if (!to.name) {
+    const user = auth.getCurrentUser();
+    if (user) {
+      return next(frontendURL(`accounts/${user.account_id}/dashboard`));
     }
+    return next('/app/login');
+  }
 
-    userAuthentication.then(() => {
-      if (!to.name) {
-        const { isLoggedIn, getCurrentUser: user } = store.getters;
-        if (isLoggedIn) {
-          return next(frontendURL(`accounts/${user.account_id}/dashboard`));
-        }
-        return next('/app/login');
-      }
-
-      return validateRouteAccess(to, from, next, store);
-    });
-  });
-};
+  return validateRouteAccess(to, from, next);
+});
 
 export default router;

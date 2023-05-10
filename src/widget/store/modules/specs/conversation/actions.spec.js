@@ -6,7 +6,6 @@ jest.mock('../../../../helpers/uuid');
 jest.mock('widget/helpers/axios');
 
 const commit = jest.fn();
-const dispatch = jest.fn();
 
 describe('#actions', () => {
   describe('#createConversation', () => {
@@ -93,7 +92,7 @@ describe('#actions', () => {
   });
 
   describe('#sendMessage', () => {
-    it('sends correct mutations', async () => {
+    it('sends correct mutations', () => {
       const mockDate = new Date(1466424490000);
       getUuid.mockImplementationOnce(() => '1111');
       const spy = jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
@@ -110,16 +109,15 @@ describe('#actions', () => {
           search: '?param=1',
         },
       }));
-      await actions.sendMessage({ commit, dispatch }, { content: 'hello' });
+      actions.sendMessage({ commit }, { content: 'hello' });
       spy.mockRestore();
       windowSpy.mockRestore();
-      expect(dispatch).toBeCalledWith('sendMessageWithData', {
-        attachments: undefined,
-        content: 'hello',
-        created_at: 1466424490,
+      expect(commit).toBeCalledWith('pushMessageToConversation', {
         id: '1111',
-        message_type: 0,
+        content: 'hello',
         status: 'in_progress',
+        created_at: 1466424490,
+        message_type: 0,
       });
     });
   });
@@ -132,7 +130,7 @@ describe('#actions', () => {
       const thumbUrl = '';
       const attachment = { thumbUrl, fileType: 'file' };
 
-      actions.sendAttachment({ commit, dispatch }, { attachment });
+      actions.sendAttachment({ commit }, { attachment });
       spy.mockRestore();
       expect(commit).toBeCalledWith('pushMessageToConversation', {
         id: '1111',
@@ -181,28 +179,22 @@ describe('#actions', () => {
   describe('#fetchOldConversations', () => {
     it('sends correct actions', async () => {
       API.get.mockResolvedValue({
-        data: {
-          payload: [
-            {
-              id: 1,
-              text: 'hey',
-              content_attributes: {},
-            },
-            {
-              id: 2,
-              text: 'welcome',
-              content_attributes: { deleted: true },
-            },
-          ],
-          meta: {
-            contact_last_seen_at: 1466424490,
+        data: [
+          {
+            id: 1,
+            text: 'hey',
+            content_attributes: {},
           },
-        },
+          {
+            id: 2,
+            text: 'welcome',
+            content_attributes: { deleted: true },
+          },
+        ],
       });
       await actions.fetchOldConversations({ commit }, {});
       expect(commit.mock.calls).toEqual([
         ['setConversationListLoading', true],
-        ['conversation/setMetaUserLastSeenAt', 1466424490, { root: true }],
         [
           'setMessagesInConversation',
           [

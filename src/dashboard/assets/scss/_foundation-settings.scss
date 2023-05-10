@@ -45,9 +45,6 @@
 // 1. Global
 // ---------
 
-// Disable contrast warnings in Foundation.
-$contrast-warnings: false;
-
 $global-font-size: 10px;
 $global-width: 100%;
 $global-lineheight: 1.5;
@@ -74,8 +71,8 @@ Tahoma,
 Arial,
 sans-serif;
 $body-antialiased: true;
-$global-margin: $space-small;
-$global-padding: $space-small;
+$global-margin: $space-one;
+$global-padding: $space-one;
 $global-weight-normal: normal;
 $global-weight-bold: bold;
 $global-radius: 0;
@@ -222,9 +219,9 @@ $badge-background: $primary-color;
 $badge-color: $white;
 $badge-color-alt: $black;
 $badge-palette: $foundation-palette;
-$badge-padding: var(--space-smaller);
+$badge-padding: 0.3em;
 $badge-minwidth: 2.1em;
-$badge-font-size: var(--font-size-nano);
+$badge-font-size: 0.6rem;
 
 // 10. Breadcrumbs
 // ---------------
@@ -254,7 +251,7 @@ $button-sizes: (tiny: var(--font-size-micro),
   default: var(--font-size-small),
   large: var(--font-size-medium));
 $button-palette: $foundation-palette;
-$button-opacity-disabled: 0.4;
+$button-opacity-disabled: 0.25;
 $button-background-hover-lightness: -20%;
 $button-hollow-hover-lightness: -50%;
 $button-transition: background-color 0.25s ease-out,
@@ -370,7 +367,7 @@ $input-font-weight: $global-weight-normal;
 $input-background: $white;
 $input-background-focus: $white;
 $input-background-disabled: $light-gray;
-$input-border: 1px solid var(--s-200);
+$input-border: 1px solid $color-border;
 $input-border-focus: 1px solid lighten($primary-color, 15%);
 $input-shadow: 0;
 $input-shadow-focus: 0;
@@ -383,8 +380,8 @@ $form-button-radius: var(--border-radius-normal);
 // 20. Label
 // ---------
 
-$label-background: $white;
-$label-color: $black;
+$label-background: $primary-color;
+$label-color: $white;
 $label-color-alt: $black;
 $label-palette: $foundation-palette;
 $label-font-size: $font-size-mini;
@@ -403,7 +400,7 @@ $mediaobject-image-width-stacked: 100%;
 
 $menu-margin: 0;
 $menu-margin-nested: $space-medium;
-$menu-item-padding: $space-slab;
+$menu-item-padding: $space-one;
 $menu-item-color-active: $white;
 $menu-item-background-active: $color-background;
 $menu-icon-spacing: 0.25rem;

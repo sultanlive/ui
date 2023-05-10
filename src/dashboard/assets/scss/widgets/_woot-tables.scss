@@ -1,22 +1,21 @@
 table {
   border-spacing: 0;
-  font-size: var(--font-size-small);
+  font-size: $font-size-small;
 
   thead {
     th {
-      font-weight: var(--font-weight-bold);
-      text-align: left;
+      font-weight: $font-weight-bold;
       text-transform: uppercase;
     }
   }
 
   tbody {
     tr {
-      border-bottom: 1px solid var(--color-border-light);
+      border-bottom: 1px solid $color-border-light;
     }
 
     td {
-      padding: var(--space-small);
+      @include padding($space-one $space-small);
     }
   }
 }
@@ -37,7 +36,7 @@ table {
 
   .agent-name {
     display: block;
-    font-weight: var(--font-weight-medium);
+    font-weight: $font-weight-medium;
     text-transform: capitalize;
   }
 
@@ -55,6 +54,6 @@ table {
   }
 
   .button {
-    margin: 0;
+    @include margin($zero);
   }
 }

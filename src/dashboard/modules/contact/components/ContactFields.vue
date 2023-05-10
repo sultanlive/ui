@@ -1,11 +1,9 @@
 <template>
   <div class="contact-fields">
-    <h3 class="block-title title">
-      {{ $t('CONTACTS_PAGE.FIELDS') }}
-    </h3>
+    <h3 class="block-title title">Contact fields</h3>
     <attribute
       :label="$t('CONTACT_PANEL.EMAIL_ADDRESS')"
-      icon="mail"
+      icon="ion-email"
       emoji=""
       :value="contact.email"
       :show-edit="true"
@@ -13,7 +11,7 @@
     />
     <attribute
       :label="$t('CONTACT_PANEL.PHONE_NUMBER')"
-      icon="call"
+      icon="ion-ios-telephone"
       emoji=""
       :value="contact.phone_number"
       :show-edit="true"
@@ -22,7 +20,7 @@
     <attribute
       v-if="additionalAttributes.location"
       :label="$t('CONTACT_PANEL.LOCATION')"
-      icon="map"
+      icon="ion-map"
       emoji="🌍"
       :value="additionalAttributes.location"
       :show-edit="true"
@@ -35,7 +33,7 @@
     >
       <attribute
         :label="attribute"
-        icon="chevron-right"
+        icon="ion-arrow-right-c"
         :value="customAttributes[attribute]"
         :show-edit="true"
         @update="value => onCustomAttributeUpdate(attribute, value)"
@@ -44,7 +42,7 @@
     <woot-button
       size="small"
       variant="link"
-      icon="add"
+      icon="ion-plus"
       @click="handleCustomCreate"
     >
       {{ $t('CUSTOM_ATTRIBUTES.ADD.TITLE') }}

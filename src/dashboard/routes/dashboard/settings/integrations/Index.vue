@@ -17,20 +17,6 @@
               :integration-action="item.action"
             />
           </div>
-          <div class="small-12 columns integration">
-            <integration
-              integration-id="dashboard-apps"
-              integration-logo="dashboard-apps.svg"
-              :integration-name="
-                $t('INTEGRATION_SETTINGS.DASHBOARD_APPS.TITLE')
-              "
-              :integration-description="
-                $t('INTEGRATION_SETTINGS.DASHBOARD_APPS.DESCRIPTION')
-              "
-              integration-enabled
-              integration-action="/dashboard-apps"
-            />
-          </div>
         </div>
       </div>
     </div>

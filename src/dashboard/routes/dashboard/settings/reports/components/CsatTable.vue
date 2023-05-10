@@ -26,14 +26,13 @@ import UserAvatarWithName from 'dashboard/components/widgets/UserAvatarWithName'
 import { CSAT_RATINGS } from 'shared/constants/messages';
 import { mapGetters } from 'vuex';
 import timeMixin from 'dashboard/mixins/time';
-import rtlMixin from 'shared/mixins/rtlMixin';
 
 export default {
   components: {
     VeTable,
     VePagination,
   },
-  mixins: [timeMixin, rtlMixin],
+  mixins: [timeMixin],
   props: {
     pageIndex: {
       type: Number,
@@ -52,7 +51,7 @@ export default {
           field: 'contact',
           key: 'contact',
           title: this.$t('CSAT_REPORTS.TABLE.HEADER.CONTACT_NAME'),
-          align: this.isRTLView ? 'right' : 'left',
+          align: 'left',
           width: 200,
           renderBodyCell: ({ row }) => {
             if (row.contact) {
@@ -65,7 +64,7 @@ export default {
           field: 'assignedAgent',
           key: 'assignedAgent',
           title: this.$t('CSAT_REPORTS.TABLE.HEADER.AGENT_NAME'),
-          align: this.isRTLView ? 'right' : 'left',
+          align: 'left',
           width: 200,
           renderBodyCell: ({ row }) => {
             if (row.assignedAgent) {
@@ -95,14 +94,14 @@ export default {
           field: 'feedbackText',
           key: 'feedbackText',
           title: this.$t('CSAT_REPORTS.TABLE.HEADER.FEEDBACK_TEXT'),
-          align: this.isRTLView ? 'right' : 'left',
+          align: 'left',
           width: 400,
         },
         {
-          field: 'conversationId',
-          key: 'conversationId',
+          field: 'converstionId',
+          key: 'converstionId',
           title: '',
-          align: this.isRTLView ? 'right' : 'left',
+          align: 'left',
           width: 100,
           renderBodyCell: ({ row }) => {
             const routerParams = {

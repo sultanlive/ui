@@ -1,71 +1,113 @@
 <template>
-  <div
-    v-if="!provider"
-    class="wizard-body small-12 medium-9 columns height-auto"
-  >
+  <div class="wizard-body small-9 columns">
     <page-header
-      :header-title="$t('INBOX_MGMT.ADD.EMAIL_PROVIDER.TITLE')"
-      :header-content="$t('INBOX_MGMT.ADD.EMAIL_PROVIDER.DESCRIPTION')"
+      :header-title="$t('INBOX_MGMT.ADD.EMAIL_CHANNEL.TITLE')"
+      :header-content="$t('INBOX_MGMT.ADD.EMAIL_CHANNEL.DESC')"
     />
-    <div class="row channel-list">
-      <channel-selector
-        v-for="emailProvider in emailProviderList"
-        :key="emailProvider.key"
-        :title="emailProvider.title"
-        :src="emailProvider.src"
-        @click="() => onClick(emailProvider.key)"
-      />
-    </div>
+    <form class="row" @submit.prevent="createChannel()">
+      <div class="medium-8 columns">
+        <label :class="{ error: $v.channelName.$error }">
+          {{ $t('INBOX_MGMT.ADD.EMAIL_CHANNEL.CHANNEL_NAME.LABEL') }}
+          <input
+            v-model.trim="channelName"
+            type="text"
+            :placeholder="
+              $t('INBOX_MGMT.ADD.EMAIL_CHANNEL.CHANNEL_NAME.PLACEHOLDER')
+            "
+            @blur="$v.channelName.$touch"
+          />
+          <span v-if="$v.channelName.$error" class="message">{{
+            $t('INBOX_MGMT.ADD.EMAIL_CHANNEL.CHANNEL_NAME.ERROR')
+          }}</span>
+        </label>
+      </div>
+
+      <div class="medium-8 columns">
+        <label :class="{ error: $v.email.$error }">
+          {{ $t('INBOX_MGMT.ADD.EMAIL_CHANNEL.EMAIL.LABEL') }}
+          <input
+            v-model.trim="email"
+            type="text"
+            :placeholder="$t('INBOX_MGMT.ADD.EMAIL_CHANNEL.EMAIL.PLACEHOLDER')"
+            @blur="$v.email.$touch"
+          />
+        </label>
+        <p class="help-text">
+          {{ $t('INBOX_MGMT.ADD.EMAIL_CHANNEL.EMAIL.SUBTITLE') }}
+        </p>
+      </div>
+
+      <div class="medium-12 columns">
+        <woot-submit-button
+          :loading="uiFlags.isCreating"
+          :button-text="$t('INBOX_MGMT.ADD.EMAIL_CHANNEL.SUBMIT_BUTTON')"
+        />
+      </div>
+    </form>
   </div>
-  <microsoft v-else-if="provider === 'microsoft'" />
-  <forward-to-option v-else-if="provider === 'other_provider'" />
 </template>
+
 <script>
-import ForwardToOption from './emailChannels/ForwardToOption';
-import Microsoft from './emailChannels/Microsoft';
 import { mapGetters } from 'vuex';
-import ChannelSelector from 'dashboard/components/ChannelSelector.vue';
+import alertMixin from 'shared/mixins/alertMixin';
+import { required } from 'vuelidate/lib/validators';
+import router from '../../../../index';
 import PageHeader from '../../SettingsSubPageHeader';
+
+const validEmail = (value = '') => value.includes('@');
 
 export default {
   components: {
-    ChannelSelector,
-    ForwardToOption,
-    Microsoft,
     PageHeader,
   },
+  mixins: [alertMixin],
   data() {
-    return { provider: '' };
+    return {
+      channelName: '',
+      email: '',
+    };
   },
   computed: {
-    ...mapGetters({ globalConfig: 'globalConfig/get' }),
-    emailProviderList() {
-      return [
-        {
-          title: this.$t('INBOX_MGMT.EMAIL_PROVIDERS.MICROSOFT'),
-          isEnabled: !!this.globalConfig.azureAppId,
-          key: 'microsoft',
-          src: '/assets/images/dashboard/channels/microsoft.png',
-        },
-        {
-          title: this.$t('INBOX_MGMT.EMAIL_PROVIDERS.OTHER_PROVIDERS'),
-          isEnabled: true,
-          key: 'other_provider',
-          src: '/assets/images/dashboard/channels/email.png',
-        },
-      ].filter(provider => provider.isEnabled);
-    },
+    ...mapGetters({
+      uiFlags: 'inboxes/getUIFlags',
+    }),
+  },
+  validations: {
+    channelName: { required },
+    email: { required, validEmail },
   },
   methods: {
-    onClick(provider) {
-      this.provider = provider;
+    async createChannel() {
+      this.$v.$touch();
+      if (this.$v.$invalid) {
+        return;
+      }
+
+      try {
+        const emailChannel = await this.$store.dispatch(
+          'inboxes/createChannel',
+          {
+            name: this.channelName,
+            channel: {
+              type: 'email',
+              email: this.email,
+            },
+          }
+        );
+
+        router.replace({
+          name: 'settings_inboxes_add_agents',
+          params: {
+            page: 'new',
+            inbox_id: emailChannel.id,
+          },
+        });
+      } catch (error) {
+        this.showAlert(
+          this.$t('INBOX_MGMT.ADD.EMAIL_CHANNEL.API.ERROR_MESSAGE')
+        );
+      }
     },
   },
 };
 </script>
-
-<style scoped>
-.channel-list {
-  margin-top: var(--space-medium);
-}
-</style>

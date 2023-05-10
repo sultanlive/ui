@@ -1,26 +1,16 @@
 <template>
   <div>
     <div class="ui-snackbar">
-      <div class="ui-snackbar-text">
-        {{ message }}
-      </div>
-      <div v-if="action" class="ui-snackbar-action">
-        <router-link v-if="action.type == 'link'" :to="action.to">
-          {{ action.message }}
-        </router-link>
-      </div>
+      <div class="ui-snackbar-text">{{ message }}</div>
     </div>
   </div>
 </template>
 
 <script>
+
 export default {
   props: {
-    message: { type: String, default: '' },
-    action: {
-      type: Object,
-      default: () => {},
-    },
+    message: String,
     showButton: Boolean,
     duration: {
       type: [String, Number],
@@ -32,7 +22,9 @@ export default {
       toggleAfterTimeout: false,
     };
   },
-  mounted() {},
-  methods: {},
+  methods: {
+  },
+  mounted() {
+  },
 };
 </script>

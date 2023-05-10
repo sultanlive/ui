@@ -9,7 +9,7 @@ export default {
       component: SettingsContent,
       props: {
         headerTitle: 'CANNED_MGMT.HEADER',
-        icon: 'chat-multiple',
+        icon: 'ion-chatbox-working',
         showNewButton: false,
       },
       children: [

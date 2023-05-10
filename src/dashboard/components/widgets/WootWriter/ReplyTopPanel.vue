@@ -1,24 +1,23 @@
 <template>
   <div class="top-box">
     <div class="mode-wrap button-group">
-      <woot-button
-        variant="clear"
-        class="button--reply"
+      <button
+        class="button clear button--reply"
         :class="replyButtonClass"
         @click="handleReplyClick"
       >
+        <emoji-or-icon icon="" emoji="💬" />
         {{ $t('CONVERSATION.REPLYBOX.REPLY') }}
-      </woot-button>
+      </button>
 
-      <woot-button
-        class="button--note"
-        variant="clear"
-        color-scheme="warning"
+      <button
+        class="button clear button--note"
         :class="noteButtonClass"
         @click="handleNoteClick"
       >
+        <emoji-or-icon icon="" emoji="📝" />
         {{ $t('CONVERSATION.REPLYBOX.PRIVATE_NOTE') }}
-      </woot-button>
+      </button>
     </div>
     <div class="action-wrap">
       <div v-if="isMessageLengthReachingThreshold" class="tabs-title">
@@ -27,35 +26,17 @@
         </span>
       </div>
     </div>
-    <woot-button
-      v-if="popoutReplyBox"
-      variant="clear"
-      icon="dismiss"
-      color-scheme="secondary"
-      class-names="popout-button"
-      @click="$emit('click')"
-    />
-    <woot-button
-      v-else
-      variant="clear"
-      icon="resize-large"
-      color-scheme="secondary"
-      class-names="popout-button"
-      @click="$emit('click')"
-    />
   </div>
 </template>
 
 <script>
 import { REPLY_EDITOR_MODES, CHAR_LENGTH_WARNING } from './constants';
-import {
-  hasPressedAltAndPKey,
-  hasPressedAltAndLKey,
-} from 'shared/helpers/KeyboardHelpers';
-import eventListenerMixins from 'shared/mixins/eventListenerMixins';
+import EmojiOrIcon from 'shared/components/EmojiOrIcon';
 export default {
   name: 'ReplyTopPanel',
-  mixins: [eventListenerMixins],
+  components: {
+    EmojiOrIcon,
+  },
   props: {
     mode: {
       type: String,
@@ -72,10 +53,6 @@ export default {
     charactersRemaining: {
       type: Number,
       default: () => 0,
-    },
-    popoutReplyBox: {
-      type: Boolean,
-      default: false,
     },
   },
   computed: {
@@ -99,14 +76,6 @@ export default {
     },
   },
   methods: {
-    handleKeyEvents(e) {
-      if (hasPressedAltAndPKey(e)) {
-        this.handleNoteClick();
-      }
-      if (hasPressedAltAndLKey(e)) {
-        this.handleReplyClick();
-      }
-    },
     handleReplyClick() {
       this.setReplyMode(REPLY_EDITOR_MODES.REPLY);
     },
@@ -122,7 +91,7 @@ export default {
   display: flex;
   justify-content: space-between;
 
-  background: var(--b-50);
+  background: var(--b-100);
 }
 
 .button-group {
@@ -147,8 +116,7 @@ export default {
     border-radius: 0;
     border-right: 1px solid var(--color-border);
 
-    &:hover,
-    &:focus {
+    &:hover {
       border-right: 1px solid var(--color-border);
     }
   }
@@ -163,13 +131,13 @@ export default {
 
     &:hover,
     &:active {
-      color: var(--y-700);
+      color: var(--y-800);
     }
   }
 }
 
 .button--note {
-  color: var(--y-600);
+  color: var(--y-900);
 }
 
 .action-wrap {

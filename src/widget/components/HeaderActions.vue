@@ -1,56 +1,29 @@
 <template>
   <div v-if="showHeaderActions" class="actions flex items-center">
     <button
-      v-if="canLeaveConversation && hasEndConversationEnabled"
-      class="button transparent compact"
-      :title="$t('END_CONVERSATION')"
-      @click="resolveConversation"
-    >
-      <fluent-icon
-        icon="sign-out"
-        size="22"
-        :class="$dm('text-black-900', 'dark:text-slate-50')"
-      />
-    </button>
-    <button
       v-if="showPopoutButton"
-      class="button transparent compact new-window--button "
+      class="button transparent compact new-window--button"
       @click="popoutWindow"
     >
-      <fluent-icon
-        icon="open"
-        size="22"
-        :class="$dm('text-black-900', 'dark:text-slate-50')"
-      />
+      <span class="ion-android-open"></span>
     </button>
     <button
       class="button transparent compact close-button"
       :class="{
         'rn-close-button': isRNWebView,
       }"
-      @click="closeWindow"
     >
-      <fluent-icon
-        icon="dismiss"
-        size="24"
-        :class="$dm('text-black-900', 'dark:text-slate-50')"
-      />
+      <span class="ion-android-close" @click="closeWindow"></span>
     </button>
   </div>
 </template>
 <script>
 import { mapGetters } from 'vuex';
 import { IFrameHelper, RNHelper } from 'widget/helpers/utils';
-import { popoutChatWindow } from '../helpers/popoutHelper';
-import FluentIcon from 'shared/components/FluentIcon/Index.vue';
-import darkModeMixin from 'widget/mixins/darkModeMixin';
-import configMixin from 'widget/mixins/configMixin';
-import { CONVERSATION_STATUS } from 'shared/constants/messages';
+import { buildPopoutURL } from '../helpers/urlParamsHelper';
 
 export default {
   name: 'HeaderActions',
-  components: { FluentIcon },
-  mixins: [configMixin, darkModeMixin],
   props: {
     showPopoutButton: {
       type: Boolean,
@@ -58,16 +31,6 @@ export default {
     },
   },
   computed: {
-    ...mapGetters({
-      conversationAttributes: 'conversationAttributes/getConversationParams',
-    }),
-    canLeaveConversation() {
-      return [
-        CONVERSATION_STATUS.OPEN,
-        CONVERSATION_STATUS.SNOOZED,
-        CONVERSATION_STATUS.PENDING,
-      ].includes(this.conversationStatus);
-    },
     isIframe() {
       return IFrameHelper.isIFrame();
     },
@@ -75,39 +38,44 @@ export default {
       return RNHelper.isRNWebView();
     },
     showHeaderActions() {
-      return this.isIframe || this.isRNWebView || this.hasWidgetOptions;
+      return this.isIframe || this.isRNWebView;
     },
-    conversationStatus() {
-      return this.conversationAttributes.status;
-    },
-    hasWidgetOptions() {
-      return this.showPopoutButton || this.conversationStatus === 'open';
-    },
+    ...mapGetters({
+      authToken: 'appConfig/getAuthToken',
+      webChannelConfig: 'appConfig/getWebChannelConfig',
+    }),
   },
   methods: {
     popoutWindow() {
       this.closeWindow();
       const {
-        location: { origin },
-        chatwootWebChannel: { websiteToken },
+        webChannelConfig: { websiteToken },
         authToken,
+      } = this;
+      const {
+        location: { origin },
       } = window;
-      popoutChatWindow(
+      const popoutWindowURL = buildPopoutURL({
         origin,
         websiteToken,
-        this.$root.$i18n.locale,
-        authToken
+        locale: this.$root.$i18n.locale,
+        conversationCookie: authToken,
+      });
+      const popoutWindow = window.open(
+        popoutWindowURL,
+        `webwidget_session_${websiteToken}`,
+        'resizable=off,width=400,height=600'
       );
+      popoutWindow.focus();
     },
     closeWindow() {
       if (IFrameHelper.isIFrame()) {
-        IFrameHelper.sendMessage({ event: 'closeWindow' });
+        IFrameHelper.sendMessage({
+          event: 'toggleBubble',
+        });
       } else if (RNHelper.isRNWebView) {
         RNHelper.sendMessage({ type: 'close-widget' });
       }
-    },
-    resolveConversation() {
-      this.$store.dispatch('conversation/resolveConversation');
     },
   },
 };
@@ -123,6 +91,10 @@ export default {
   span {
     color: $color-heading;
     font-size: $font-size-large;
+
+    &.ion-android-close {
+      font-size: $font-size-big;
+    }
   }
 
   .close-button {

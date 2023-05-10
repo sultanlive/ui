@@ -1,74 +1,58 @@
 <template>
-  <div
-    v-if="!conversationSize && isFetchingList"
-    class="flex flex-1 items-center h-full bg-black-25 justify-center"
-  >
-    <spinner size="" />
-  </div>
-  <div
-    v-else
-    class="flex flex-col justify-end h-full"
-    :class="{
-      'is-mobile': isMobile,
-      'is-widget-right': isRightAligned,
-      'is-bubble-hidden': hideMessageBubble,
-      'is-flat-design': isWidgetStyleFlat,
-    }"
-  >
-    <router-view />
-  </div>
+  <router
+    :show-unread-view="showUnreadView"
+    :show-campaign-view="showCampaignView"
+    :is-mobile="isMobile"
+    :has-fetched="hasFetched"
+    :unread-message-count="unreadMessageCount"
+    :is-left-aligned="isLeftAligned"
+    :hide-message-bubble="hideMessageBubble"
+    :show-popout-button="showPopoutButton"
+  />
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import { setHeader } from 'widget/helpers/axios';
-import addHours from 'date-fns/addHours';
 import { IFrameHelper, RNHelper } from 'widget/helpers/utils';
-import configMixin from './mixins/configMixin';
-import availabilityMixin from 'widget/mixins/availability';
+import Router from './views/Router';
 import { getLocale } from './helpers/urlParamsHelper';
+import { BUS_EVENTS } from 'shared/constants/busEvents';
 import { isEmptyObject } from 'widget/helpers/utils';
-import Spinner from 'shared/components/Spinner.vue';
-import routerMixin from './mixins/routerMixin';
-import {
-  getExtraSpaceToScroll,
-  loadedEventConfig,
-} from './helpers/IframeEventHelper';
-import {
-  ON_AGENT_MESSAGE_RECEIVED,
-  ON_CAMPAIGN_MESSAGE_CLICK,
-  ON_UNREAD_MESSAGE_CLICK,
-} from './constants/widgetBusEvents';
-
-import { SDK_SET_BUBBLE_VISIBILITY } from '../shared/constants/sharedFrameEvents';
+import ActionCableConnector from './helpers/actionCable';
 
 export default {
   name: 'App',
   components: {
-    Spinner,
+    Router,
   },
-  mixins: [availabilityMixin, configMixin, routerMixin],
   data() {
     return {
+      showUnreadView: false,
+      showCampaignView: false,
       isMobile: false,
-      campaignsSnoozedTill: undefined,
+      hideMessageBubble: false,
+      widgetPosition: 'right',
+      showPopoutButton: false,
+      isWebWidgetTriggered: false,
     };
   },
   computed: {
     ...mapGetters({
       activeCampaign: 'campaign/getActiveCampaign',
+      authToken: 'appConfig/getAuthToken',
       campaigns: 'campaign/getCampaigns',
-      conversationSize: 'conversation/getConversationSize',
-      currentUser: 'contacts/getCurrentUser',
+      contact: 'appConfig/getContact',
       hasFetched: 'agent/getHasFetched',
-      hideMessageBubble: 'appConfig/getHideMessageBubble',
-      isFetchingList: 'conversation/getIsFetchingList',
-      isRightAligned: 'appConfig/isRightAligned',
-      isWidgetOpen: 'appConfig/getIsWidgetOpen',
+      isWidgetConfigured: 'appConfig/getWidgetConfigured',
       messageCount: 'conversation/getMessageCount',
       unreadMessageCount: 'conversation/getUnreadMessageCount',
-      isWidgetStyleFlat: 'appConfig/isWidgetStyleFlat',
+      webChannelConfig: 'appConfig/getWebChannelConfig',
     }),
+    isLeftAligned() {
+      const isLeft = this.widgetPosition === 'left';
+      return isLeft;
+    },
     isIFrame() {
       return IFrameHelper.isIFrame();
     },
@@ -80,41 +64,44 @@ export default {
     activeCampaign() {
       this.setCampaignView();
     },
+    isWidgetConfigured() {
+      const { pubsubToken } = this.contact || {};
+      window.chatwootPubsubToken = pubsubToken;
+      window.actionCable = new ActionCableConnector(
+        window.WOOT_WIDGET,
+        window.chatwootPubsubToken
+      );
+      const { websiteToken, locale } = this.webChannelConfig;
+      this.setLocale(locale);
+      if (this.isIFrame) {
+        this.registerListeners();
+        this.sendLoadedEvent();
+        setHeader('X-Auth-Token', this.authToken);
+      } else {
+        setHeader('X-Auth-Token', this.authToken);
+        this.fetchOldConversations();
+        this.fetchAvailableAgents(websiteToken);
+        this.setLocale(getLocale(window.location.search));
+      }
+      if (this.isRNWebView) {
+        this.registerListeners();
+        this.sendRNWebViewLoadedEvent();
+      }
+      this.$store.dispatch('conversationAttributes/getAttributes');
+      this.registerUnreadEvents();
+      this.registerCampaignEvents();
+    },
   },
   mounted() {
-    const { websiteToken, locale, widgetColor } = window.chatwootWebChannel;
-    this.setLocale(locale);
-    this.setWidgetColor(widgetColor);
-    setHeader(window.authToken);
-    if (this.isIFrame) {
-      this.registerListeners();
-      this.sendLoadedEvent();
-    } else {
-      this.fetchOldConversations();
-      this.fetchAvailableAgents(websiteToken);
-      this.setLocale(getLocale(window.location.search));
-    }
-    if (this.isRNWebView) {
-      this.registerListeners();
-      this.sendRNWebViewLoadedEvent();
-    }
-    this.$store.dispatch('conversationAttributes/getAttributes');
-    this.registerUnreadEvents();
-    this.registerCampaignEvents();
+    const url = new URL(window.location.href);
+    this.$store.dispatch('appConfig/fetchAppConfig', {
+      token: url.searchParams.get('cw_conversation'),
+      websiteToken: url.searchParams.get('website_token'),
+    });
   },
   methods: {
-    ...mapActions('appConfig', [
-      'setAppConfig',
-      'setReferrerHost',
-      'setWidgetColor',
-      'setBubbleVisibility',
-    ]),
     ...mapActions('conversation', ['fetchOldConversations', 'setUserLastSeen']),
-    ...mapActions('campaign', [
-      'initCampaigns',
-      'executeCampaign',
-      'resetCampaign',
-    ]),
+    ...mapActions('campaign', ['initCampaigns', 'executeCampaign']),
     ...mapActions('agent', ['fetchAvailableAgents']),
     scrollConversationToBottom() {
       const container = this.$el.querySelector('.conversation-wrap');
@@ -126,121 +113,84 @@ export default {
         label: this.$t('BUBBLE.LABEL'),
       });
     },
-    setIframeHeight(isFixedHeight) {
-      this.$nextTick(() => {
-        const extraHeight = getExtraSpaceToScroll();
-        IFrameHelper.sendMessage({
-          event: 'updateIframeHeight',
-          isFixedHeight,
-          extraHeight,
-        });
-      });
-    },
-    setLocale(localeWithVariation) {
-      if (!localeWithVariation) return;
-      const { enabledLanguages } = window.chatwootWebChannel;
-      const localeWithoutVariation = localeWithVariation.split('_')[0];
-      const hasLocaleWithoutVariation = enabledLanguages.some(
-        lang => lang.iso_639_1_code === localeWithoutVariation
-      );
-      const hasLocaleWithVariation = enabledLanguages.some(
-        lang => lang.iso_639_1_code === localeWithVariation
-      );
-
-      if (hasLocaleWithVariation) {
-        this.$root.$i18n.locale = localeWithVariation;
-      } else if (hasLocaleWithoutVariation) {
-        this.$root.$i18n.locale = localeWithoutVariation;
+    setLocale(locale) {
+      const { enabledLanguages } = this.webChannelConfig;
+      if (enabledLanguages.some(lang => lang.iso_639_1_code === locale)) {
+        this.$root.$i18n.locale = locale;
       }
     },
+    setPosition(position) {
+      const widgetPosition = position || 'right';
+      this.widgetPosition = widgetPosition;
+    },
+    setHideMessageBubble(hideBubble) {
+      this.hideMessageBubble = !!hideBubble;
+    },
     registerUnreadEvents() {
-      bus.$on(ON_AGENT_MESSAGE_RECEIVED, () => {
-        const { name: routeName } = this.$route;
-        if ((this.isWidgetOpen || !this.isIFrame) && routeName === 'messages') {
-          this.$store.dispatch('conversation/setUserLastSeen');
+      bus.$on('on-agent-message-recieved', () => {
+        if (!this.isIFrame) {
+          this.setUserLastSeen();
         }
         this.setUnreadView();
       });
-      bus.$on(ON_UNREAD_MESSAGE_CLICK, () => {
-        this.replaceRoute('messages').then(() => this.unsetUnreadView());
+      bus.$on('on-unread-view-clicked', () => {
+        this.unsetUnreadView();
+        this.setUserLastSeen();
       });
     },
     registerCampaignEvents() {
-      bus.$on(ON_CAMPAIGN_MESSAGE_CLICK, () => {
-        if (this.shouldShowPreChatForm) {
-          this.replaceRoute('prechat-form');
-        } else {
-          this.replaceRoute('messages');
-          bus.$emit('execute-campaign', { campaignId: this.activeCampaign.id });
-        }
+      bus.$on('on-campaign-view-clicked', campaignId => {
+        const { websiteToken } = this.webChannelConfig;
+        this.showCampaignView = false;
+        this.showUnreadView = false;
         this.unsetUnreadView();
+        this.setUserLastSeen();
+        this.executeCampaign({ campaignId, websiteToken });
       });
-      bus.$on('execute-campaign', campaignDetails => {
-        const { customAttributes, campaignId } = campaignDetails;
-        const { websiteToken } = window.chatwootWebChannel;
-        this.executeCampaign({ campaignId, websiteToken, customAttributes });
-        this.replaceRoute('messages');
-      });
-      bus.$on('snooze-campaigns', () => {
-        const expireBy = addHours(new Date(), 1);
-        this.campaignsSnoozedTill = Number(expireBy);
-      });
+    },
+    setPopoutDisplay(showPopoutButton) {
+      this.showPopoutButton = showPopoutButton;
     },
     setCampaignView() {
       const { messageCount, activeCampaign } = this;
-      const shouldSnoozeCampaign =
-        this.campaignsSnoozedTill && this.campaignsSnoozedTill > Date.now();
       const isCampaignReadyToExecute =
         !isEmptyObject(activeCampaign) &&
         !messageCount &&
-        !shouldSnoozeCampaign;
+        !this.isWebWidgetTriggered;
       if (this.isIFrame && isCampaignReadyToExecute) {
-        this.replaceRoute('campaigns').then(() => {
-          this.setIframeHeight(true);
-          IFrameHelper.sendMessage({ event: 'setUnreadMode' });
-        });
+        this.showCampaignView = true;
+        IFrameHelper.sendMessage({ event: 'setCampaignMode' });
       }
     },
     setUnreadView() {
       const { unreadMessageCount } = this;
-
-      if (this.isIFrame && unreadMessageCount > 0 && !this.isWidgetOpen) {
-        this.replaceRoute('unread-messages').then(() => {
-          this.setIframeHeight(true);
-          IFrameHelper.sendMessage({ event: 'setUnreadMode' });
+      if (this.isIFrame && unreadMessageCount > 0) {
+        IFrameHelper.sendMessage({
+          event: 'setUnreadMode',
+          unreadMessageCount,
         });
-        this.handleUnreadNotificationDot();
       }
     },
     unsetUnreadView() {
       if (this.isIFrame) {
         IFrameHelper.sendMessage({ event: 'resetUnreadMode' });
-        this.setIframeHeight(false);
-        this.handleUnreadNotificationDot();
-      }
-    },
-    handleUnreadNotificationDot() {
-      const { unreadMessageCount } = this;
-      if (this.isIFrame) {
-        IFrameHelper.sendMessage({
-          event: 'handleNotificationDot',
-          unreadMessageCount,
-        });
       }
     },
     createWidgetEvents(message) {
       const { eventName } = message;
       const isWidgetTriggerEvent = eventName === 'webwidget.triggered';
+      this.isWebWidgetTriggered = true;
       if (
         isWidgetTriggerEvent &&
-        ['unread-messages', 'campaigns'].includes(this.$route.name)
+        (this.showUnreadView || this.showCampaignView)
       ) {
         return;
       }
+      this.setUserLastSeen();
       this.$store.dispatch('events/create', { name: eventName });
     },
     registerListeners() {
-      const { websiteToken } = window.chatwootWebChannel;
+      const { websiteToken } = this.webChannelConfig;
       window.addEventListener('message', e => {
         if (!IFrameHelper.isAValidEvent(e)) {
           return;
@@ -249,24 +199,21 @@ export default {
         if (message.event === 'config-set') {
           this.setLocale(message.locale);
           this.setBubbleLabel();
+          this.setPosition(message.position);
           this.fetchOldConversations().then(() => this.setUnreadView());
+          this.setPopoutDisplay(message.showPopoutButton);
           this.fetchAvailableAgents(websiteToken);
-          this.setAppConfig(message);
+          this.setHideMessageBubble(message.hideMessageBubble);
           this.$store.dispatch('contacts/get');
-          this.setCampaignReadData(message.campaignsSnoozedTill);
         } else if (message.event === 'widget-visible') {
           this.scrollConversationToBottom();
         } else if (message.event === 'change-url') {
           const { referrerURL, referrerHost } = message;
-          this.initCampaigns({
-            currentURL: referrerURL,
-            websiteToken,
-            isInBusinessHours: this.isInBusinessHours,
-          });
+          this.initCampaigns({ currentURL: referrerURL, websiteToken });
           window.referrerURL = referrerURL;
-          this.setReferrerHost(referrerHost);
+          bus.$emit(BUS_EVENTS.SET_REFERRER_HOST, referrerHost);
         } else if (message.event === 'toggle-close-button') {
-          this.isMobile = message.isMobile;
+          this.isMobile = message.showClose;
         } else if (message.event === 'push-event') {
           this.createWidgetEvents(message);
         } else if (message.event === 'set-label') {
@@ -274,67 +221,45 @@ export default {
         } else if (message.event === 'remove-label') {
           this.$store.dispatch('conversationLabels/destroy', message.label);
         } else if (message.event === 'set-user') {
-          this.$store.dispatch('contacts/setUser', message);
+          this.$store.dispatch('contacts/update', message);
         } else if (message.event === 'set-custom-attributes') {
           this.$store.dispatch(
             'contacts/setCustomAttributes',
             message.customAttributes
           );
         } else if (message.event === 'delete-custom-attribute') {
-          this.$store.dispatch(
-            'contacts/deleteCustomAttribute',
-            message.customAttribute
-          );
-        } else if (message.event === 'set-conversation-custom-attributes') {
-          this.$store.dispatch(
-            'conversation/setCustomAttributes',
-            message.customAttributes
-          );
-        } else if (message.event === 'delete-conversation-custom-attribute') {
-          this.$store.dispatch(
-            'conversation/deleteCustomAttribute',
-            message.customAttribute
-          );
+          this.$store.dispatch('contacts/setCustomAttributes', {
+            [message.customAttribute]: null,
+          });
         } else if (message.event === 'set-locale') {
           this.setLocale(message.locale);
           this.setBubbleLabel();
-        } else if (message.event === 'toggle-open') {
-          this.$store.dispatch('appConfig/toggleWidgetOpen', message.isOpen);
-
-          const shouldShowMessageView =
-            ['home'].includes(this.$route.name) &&
-            message.isOpen &&
-            this.messageCount;
-          const shouldShowHomeView =
-            !message.isOpen &&
-            ['unread-messages', 'campaigns'].includes(this.$route.name);
-
-          if (shouldShowMessageView) {
-            this.replaceRoute('messages');
-          }
-          if (shouldShowHomeView) {
-            this.$store.dispatch('conversation/setUserLastSeen');
-            this.unsetUnreadView();
-            this.replaceRoute('home');
-          }
-          if (!message.isOpen) {
-            this.resetCampaign();
-          }
-        } else if (message.event === SDK_SET_BUBBLE_VISIBILITY) {
-          this.setBubbleVisibility(message.hideMessageBubble);
+        } else if (message.event === 'set-unread-view') {
+          this.showUnreadView = true;
+          this.showCampaignView = false;
+        } else if (message.event === 'unset-unread-view') {
+          this.showUnreadView = false;
+          this.showCampaignView = false;
         }
       });
     },
     sendLoadedEvent() {
-      IFrameHelper.sendMessage(loadedEventConfig());
+      IFrameHelper.sendMessage({
+        event: 'loaded',
+        config: {
+          authToken: this.authToken,
+          channelConfig: this.webChannelConfig,
+        },
+      });
     },
     sendRNWebViewLoadedEvent() {
-      RNHelper.sendMessage(loadedEventConfig());
-    },
-    setCampaignReadData(snoozedTill) {
-      if (snoozedTill) {
-        this.campaignsSnoozedTill = Number(snoozedTill);
-      }
+      RNHelper.sendMessage({
+        event: 'loaded',
+        config: {
+          authToken: this.authToken,
+          channelConfig: this.webChannelConfig,
+        },
+      });
     },
   },
 };

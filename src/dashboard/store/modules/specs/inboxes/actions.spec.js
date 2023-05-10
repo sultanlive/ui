@@ -10,19 +10,7 @@ jest.mock('axios');
 describe('#actions', () => {
   describe('#get', () => {
     it('sends correct actions if API is success', async () => {
-      const mockedGet = jest.fn(url => {
-        if (url === '/api/v1/inboxes') {
-          return Promise.resolve({ data: { payload: inboxList } });
-        }
-        if (url === '/api/v1/accounts//cache_keys') {
-          return Promise.resolve({ data: { cache_keys: { inboxes: 0 } } });
-        }
-        // Return default value or throw an error for unexpected requests
-        return Promise.reject(new Error('Unexpected request: ' + url));
-      });
-
-      axios.get = mockedGet;
-
+      axios.get.mockResolvedValue({ data: { payload: inboxList } });
       await actions.get({ commit });
       expect(commit.mock.calls).toEqual([
         [types.default.SET_INBOXES_UI_FLAG, { isFetching: true }],
@@ -93,9 +81,12 @@ describe('#actions', () => {
         { id: updatedInbox.id, inbox: { enable_auto_assignment: false } }
       );
       expect(commit.mock.calls).toEqual([
-        [types.default.SET_INBOXES_UI_FLAG, { isUpdating: true }],
+        [types.default.SET_INBOXES_UI_FLAG, { isUpdatingAutoAssignment: true }],
         [types.default.EDIT_INBOXES, updatedInbox],
-        [types.default.SET_INBOXES_UI_FLAG, { isUpdating: false }],
+        [
+          types.default.SET_INBOXES_UI_FLAG,
+          { isUpdatingAutoAssignment: false },
+        ],
       ]);
     });
     it('sends correct actions if API is error', async () => {
@@ -107,68 +98,11 @@ describe('#actions', () => {
         )
       ).rejects.toThrow(Error);
       expect(commit.mock.calls).toEqual([
-        [types.default.SET_INBOXES_UI_FLAG, { isUpdating: true }],
-        [types.default.SET_INBOXES_UI_FLAG, { isUpdating: false }],
-      ]);
-    });
-  });
-
-  describe('#updateInboxIMAP', () => {
-    it('sends correct actions if API is success', async () => {
-      const updatedInbox = inboxList[0];
-
-      axios.patch.mockResolvedValue({ data: updatedInbox });
-      await actions.updateInboxIMAP(
-        { commit },
-        { id: updatedInbox.id, inbox: { channel: { imap_enabled: true } } }
-      );
-      expect(commit.mock.calls).toEqual([
-        [types.default.SET_INBOXES_UI_FLAG, { isUpdatingIMAP: true }],
-        [types.default.EDIT_INBOXES, updatedInbox],
-        [types.default.SET_INBOXES_UI_FLAG, { isUpdatingIMAP: false }],
-      ]);
-    });
-    it('sends correct actions if API is error', async () => {
-      axios.patch.mockRejectedValue({ message: 'Incorrect header' });
-      await expect(
-        actions.updateInboxIMAP(
-          { commit },
-          { id: inboxList[0].id, inbox: { channel: { imap_enabled: true } } }
-        )
-      ).rejects.toThrow(Error);
-      expect(commit.mock.calls).toEqual([
-        [types.default.SET_INBOXES_UI_FLAG, { isUpdatingIMAP: true }],
-        [types.default.SET_INBOXES_UI_FLAG, { isUpdatingIMAP: false }],
-      ]);
-    });
-  });
-
-  describe('#updateInboxSMTP', () => {
-    it('sends correct actions if API is success', async () => {
-      const updatedInbox = inboxList[0];
-
-      axios.patch.mockResolvedValue({ data: updatedInbox });
-      await actions.updateInboxSMTP(
-        { commit },
-        { id: updatedInbox.id, inbox: { channel: { smtp_enabled: true } } }
-      );
-      expect(commit.mock.calls).toEqual([
-        [types.default.SET_INBOXES_UI_FLAG, { isUpdatingSMTP: true }],
-        [types.default.EDIT_INBOXES, updatedInbox],
-        [types.default.SET_INBOXES_UI_FLAG, { isUpdatingSMTP: false }],
-      ]);
-    });
-    it('sends correct actions if API is error', async () => {
-      axios.patch.mockRejectedValue({ message: 'Incorrect header' });
-      await expect(
-        actions.updateInboxSMTP(
-          { commit },
-          { id: inboxList[0].id, inbox: { channel: { smtp_enabled: true } } }
-        )
-      ).rejects.toThrow(Error);
-      expect(commit.mock.calls).toEqual([
-        [types.default.SET_INBOXES_UI_FLAG, { isUpdatingSMTP: true }],
-        [types.default.SET_INBOXES_UI_FLAG, { isUpdatingSMTP: false }],
+        [types.default.SET_INBOXES_UI_FLAG, { isUpdatingAutoAssignment: true }],
+        [
+          types.default.SET_INBOXES_UI_FLAG,
+          { isUpdatingAutoAssignment: false },
+        ],
       ]);
     });
   });
@@ -192,21 +126,6 @@ describe('#actions', () => {
         [types.default.SET_INBOXES_UI_FLAG, { isDeleting: true }],
         [types.default.SET_INBOXES_UI_FLAG, { isDeleting: false }],
       ]);
-    });
-  });
-
-  describe('#deleteInboxAvatar', () => {
-    it('sends correct actions if API is success', async () => {
-      axios.delete.mockResolvedValue();
-      await expect(
-        actions.deleteInboxAvatar({}, inboxList[0].id)
-      ).resolves.toBe();
-    });
-    it('sends correct actions if API is error', async () => {
-      axios.delete.mockRejectedValue({ message: 'Incorrect header' });
-      await expect(
-        actions.deleteInboxAvatar({}, inboxList[0].id)
-      ).rejects.toThrow(Error);
     });
   });
 });

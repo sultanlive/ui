@@ -30,7 +30,7 @@
     },
     "LIST": {
       "FETCHING": "Fetching integration hooks",
-      "INBOX": "Inkorg",
+      "INBOX": "Inbox",
       "DELETE": {
         "BUTTON_TEXT": "Radera"
       }

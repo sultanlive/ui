@@ -1,10 +1,10 @@
 <template>
   <div class="settings--content">
-    <div class="pre-chat--title">
+    <div class="prechat--title">
       {{ $t('INBOX_MGMT.PRE_CHAT_FORM.DESCRIPTION') }}
     </div>
-    <form @submit.prevent="updateInbox">
-      <label class="medium-3 columns">
+    <form class="medium-6" @submit.prevent="updateInbox">
+      <label class="medium-9 columns">
         {{ $t('INBOX_MGMT.PRE_CHAT_FORM.ENABLE.LABEL') }}
         <select v-model="preChatFormEnabled">
           <option :value="true">
@@ -15,63 +15,31 @@
           </option>
         </select>
       </label>
-      <div v-if="preChatFormEnabled">
-        <label class="columns medium-8  large-8">
-          <label>
-            {{ $t('INBOX_MGMT.PRE_CHAT_FORM.PRE_CHAT_MESSAGE.LABEL') }}
-          </label>
-          <woot-message-editor
-            v-model="preChatMessage"
-            class="message-editor"
-            :placeholder="
-              $t('INBOX_MGMT.PRE_CHAT_FORM.PRE_CHAT_MESSAGE.PLACEHOLDER')
-            "
-          />
+
+      <label class="medium-9">
+        {{ $t('INBOX_MGMT.PRE_CHAT_FORM.PRE_CHAT_MESSAGE.LABEL') }}
+        <textarea
+          v-model.trim="preChatMessage"
+          type="text"
+          :placeholder="
+            $t('INBOX_MGMT.PRE_CHAT_FORM.PRE_CHAT_MESSAGE.PLACEHOLDER')
+          "
+        />
+      </label>
+      <div>
+        <input
+          v-model="preChatFieldOptions"
+          type="checkbox"
+          value="requireEmail"
+          @input="handlePreChatFieldOptions"
+        />
+        <label for="requireEmail">
+          {{ $t('INBOX_MGMT.PRE_CHAT_FORM.REQUIRE_EMAIL.LABEL') }}
         </label>
-        <div class="columns medium-8  large-8 pre-chat-fields">
-          <label>{{ $t('INBOX_MGMT.PRE_CHAT_FORM.SET_FIELDS') }}</label>
-          <table class="table table-striped w-full">
-            <thead class="thead-dark">
-              <tr>
-                <th scope="col" />
-                <th scope="col" />
-                <th scope="col">
-                  {{ $t('INBOX_MGMT.PRE_CHAT_FORM.SET_FIELDS_HEADER.KEY') }}
-                </th>
-                <th scope="col">
-                  {{ $t('INBOX_MGMT.PRE_CHAT_FORM.SET_FIELDS_HEADER.TYPE') }}
-                </th>
-                <th scope="col">
-                  {{
-                    $t('INBOX_MGMT.PRE_CHAT_FORM.SET_FIELDS_HEADER.REQUIRED')
-                  }}
-                </th>
-                <th scope="col">
-                  {{ $t('INBOX_MGMT.PRE_CHAT_FORM.SET_FIELDS_HEADER.LABEL') }}
-                </th>
-                <th scope="col">
-                  {{
-                    $t(
-                      'INBOX_MGMT.PRE_CHAT_FORM.SET_FIELDS_HEADER.PLACE_HOLDER'
-                    )
-                  }}
-                </th>
-              </tr>
-            </thead>
-            <pre-chat-fields
-              :pre-chat-fields="preChatFields"
-              @update="handlePreChatFieldOptions"
-              @drag-end="changePreChatFieldFieldsOrder"
-            />
-          </table>
-        </div>
       </div>
       <woot-submit-button
-        class="submit-button"
-        :button-text="
-          $t('INBOX_MGMT.SETTINGS_POPUP.UPDATE_PRE_CHAT_FORM_SETTINGS')
-        "
-        :loading="uiFlags.isUpdating"
+        :button-text="$t('INBOX_MGMT.SETTINGS_POPUP.UPDATE')"
+        :loading="uiFlags.isUpdatingInbox"
       />
     </form>
   </div>
@@ -79,14 +47,8 @@
 <script>
 import { mapGetters } from 'vuex';
 import alertMixin from 'shared/mixins/alertMixin';
-import PreChatFields from './PreChatFields.vue';
-import { getPreChatFields, standardFieldKeys } from 'dashboard/helper/preChat';
-import WootMessageEditor from 'dashboard/components/widgets/WootWriter/Editor';
+
 export default {
-  components: {
-    PreChatFields,
-    WootMessageEditor,
-  },
   mixins: [alertMixin],
   props: {
     inbox: {
@@ -98,21 +60,11 @@ export default {
     return {
       preChatFormEnabled: false,
       preChatMessage: '',
-      preChatFields: [],
+      preChatFieldOptions: [],
     };
   },
   computed: {
-    ...mapGetters({
-      uiFlags: 'inboxes/getUIFlags',
-      customAttributes: 'attributes/getAttributes',
-    }),
-    preChatFieldOptions() {
-      const { pre_chat_form_options: preChatFormOptions } = this.inbox;
-      return getPreChatFields({
-        preChatFormOptions,
-        customAttributes: this.customAttributes,
-      });
-    },
+    ...mapGetters({ uiFlags: 'inboxes/getUIFlags' }),
   },
   watch: {
     inbox() {
@@ -124,30 +76,25 @@ export default {
   },
   methods: {
     setDefaults() {
-      const { pre_chat_form_enabled: preChatFormEnabled } = this.inbox;
-      this.preChatFormEnabled = preChatFormEnabled;
       const {
-        pre_chat_message: preChatMessage,
-        pre_chat_fields: preChatFields,
-      } = this.preChatFieldOptions || {};
+        pre_chat_form_enabled: preChatFormEnabled,
+        pre_chat_form_options: preChatFormOptions,
+      } = this.inbox;
+      this.preChatFormEnabled = preChatFormEnabled;
+      const { pre_chat_message: preChatMessage, require_email: requireEmail } =
+        preChatFormOptions || {};
       this.preChatMessage = preChatMessage;
-      this.preChatFields = preChatFields;
+      if (requireEmail) {
+        this.preChatFieldOptions = ['requireEmail'];
+      }
     },
-    isFieldEditable(item) {
-      return !!standardFieldKeys[item.name] || !item.enabled;
+    handlePreChatFieldOptions(event) {
+      if (this.preChatFieldOptions.includes(event.target.value)) {
+        this.preChatFieldOptions = [];
+      } else {
+        this.preChatFieldOptions = [event.target.value];
+      }
     },
-    handlePreChatFieldOptions(event, type, item) {
-      this.preChatFields.forEach((field, index) => {
-        if (field.name === item.name) {
-          this.preChatFields[index][type] = !item[type];
-        }
-      });
-    },
-
-    changePreChatFieldFieldsOrder(updatedPreChatFieldOptions) {
-      this.preChatFields = updatedPreChatFieldOptions;
-    },
-
     async updateInbox() {
       try {
         const payload = {
@@ -157,7 +104,7 @@ export default {
             pre_chat_form_enabled: this.preChatFormEnabled,
             pre_chat_form_options: {
               pre_chat_message: this.preChatMessage,
-              pre_chat_fields: this.preChatFields,
+              require_email: this.preChatFieldOptions.includes('requireEmail'),
             },
           },
         };
@@ -170,18 +117,12 @@ export default {
   },
 };
 </script>
-<style scoped lang="scss">
+<style scoped>
 .settings--content {
   font-size: var(--font-size-default);
 }
-.pre-chat--title {
-  margin: var(--space-medium) 0 var(--space-slab);
-}
 
-.submit-button {
-  margin-top: var(--space-normal);
-}
-.pre-chat-fields {
-  margin-top: var(--space-normal);
+.prechat--title {
+  margin: var(--space-medium) 0 var(--space-slab);
 }
 </style>

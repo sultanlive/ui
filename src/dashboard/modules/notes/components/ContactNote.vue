@@ -1,55 +1,47 @@
 <template>
   <div class="card note-wrap">
-    <div class="header">
+    <p class="note__content">
+      {{ note }}
+    </p>
+    <div class="footer">
       <div class="meta">
-        <thumbnail
-          :title="noteAuthorName"
-          :src="noteAuthor.thumbnail"
-          :username="noteAuthorName"
-          size="20px"
-        />
+        <div :title="userName">
+          <thumbnail :src="thumbnail" :username="userName" size="16px" />
+        </div>
         <div class="date-wrap">
-          <span class="fw-medium"> {{ noteAuthorName }} </span>
-          <span> {{ $t('NOTES.LIST.LABEL') }} </span>
-          <span class="fw-medium time-stamp"> {{ readableTime }} </span>
+          <span>{{ readableTime }}</span>
         </div>
       </div>
       <div class="actions">
         <woot-button
-          v-tooltip="$t('NOTES.CONTENT_HEADER.DELETE')"
           variant="smooth"
           size="tiny"
-          icon="delete"
+          icon="ion-compose"
           color-scheme="secondary"
-          @click="toggleDeleteModal"
+          @click="onEdit"
+        />
+        <woot-button
+          variant="smooth"
+          size="tiny"
+          icon="ion-trash-b"
+          color-scheme="secondary"
+          @click="onDelete"
         />
       </div>
-      <woot-delete-modal
-        v-if="showDeleteModal"
-        :show.sync="showDeleteModal"
-        :on-close="closeDelete"
-        :on-confirm="confirmDeletion"
-        :title="$t('DELETE_NOTE.CONFIRM.TITLE')"
-        :message="$t('DELETE_NOTE.CONFIRM.MESSAGE')"
-        :confirm-text="$t('DELETE_NOTE.CONFIRM.YES')"
-        :reject-text="$t('DELETE_NOTE.CONFIRM.NO')"
-      />
     </div>
-    <p v-dompurify-html="formatMessage(note || '')" class="note__content" />
   </div>
 </template>
 
 <script>
 import Thumbnail from 'dashboard/components/widgets/Thumbnail';
 import timeMixin from 'dashboard/mixins/time';
-import messageFormatterMixin from 'shared/mixins/messageFormatterMixin';
 
 export default {
   components: {
     Thumbnail,
   },
 
-  mixins: [timeMixin, messageFormatterMixin],
+  mixins: [timeMixin],
 
   props: {
     id: {
@@ -60,80 +52,57 @@ export default {
       type: String,
       default: '',
     },
-    user: {
-      type: Object,
-      default: () => {},
+    userName: {
+      type: String,
+      default: '',
     },
-    createdAt: {
+    timeStamp: {
       type: Number,
       default: 0,
     },
+    thumbnail: {
+      type: String,
+      default: '',
+    },
   },
-  data() {
-    return {
-      showDeleteModal: false,
-    };
-  },
+
   computed: {
     readableTime() {
-      return this.dynamicTime(this.createdAt);
-    },
-    noteAuthor() {
-      return this.user || {};
-    },
-    noteAuthorName() {
-      return this.noteAuthor.name || this.$t('APP_GLOBAL.DELETED_USER');
+      return this.dynamicTime(this.timeStamp);
     },
   },
 
   methods: {
-    toggleDeleteModal() {
-      this.showDeleteModal = !this.showDeleteModal;
+    onEdit() {
+      this.$emit('edit', this.id);
     },
     onDelete() {
       this.$emit('delete', this.id);
-    },
-    confirmDeletion() {
-      this.onDelete();
-      this.closeDelete();
-    },
-    closeDelete() {
-      this.showDeleteModal = false;
     },
   },
 };
 </script>
 
 <style lang="scss" scoped>
-// For RTL direction view
-.app-rtl--wrapper {
-  .note__content {
-    ::v-deep {
-      p {
-        unicode-bidi: plaintext;
-      }
-    }
-  }
-}
-
 .note__content {
-  margin-top: var(--space-normal);
+  font-size: var(--font-size-mini);
+  margin-bottom: var(--space-smaller);
 }
 
-.header {
+.footer {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  font-size: var(--font-size-mini);
 
   .meta {
     display: flex;
-    align-items: center;
+    padding: var(--space-smaller) 0;
 
     .date-wrap {
-      margin: 0 var(--space-smaller);
+      margin-left: var(--space-smaller);
       padding: var(--space-micro);
       color: var(--color-body);
+      font-size: var(--font-size-micro);
     }
   }
   .actions {

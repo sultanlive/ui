@@ -20,10 +20,10 @@ export default {
     background: var(--g-400);
   }
   &__offline {
-    background: var(--s-500);
+    background: var(--b-600);
   }
   &__busy {
-    background: var(--y-500);
+    background: var(--y-700);
   }
 }
 </style>

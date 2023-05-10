@@ -1,7 +1,6 @@
 import Index from './Index';
 import SettingsContent from '../Wrapper';
-import Webhook from './Webhooks/Index';
-import DashboardApps from './DashboardApps/Index';
+import Webhook from './Webhook';
 import ShowIntegration from './ShowIntegration';
 import { frontendURL } from '../../../../helper/URLHelper';
 
@@ -18,7 +17,7 @@ export default {
             : '';
         return {
           headerTitle: 'INTEGRATION_SETTINGS.HEADER',
-          icon: 'flash-on',
+          icon: 'ion-flash',
           showBackButton,
           backUrl,
         };
@@ -34,12 +33,6 @@ export default {
           path: 'webhook',
           component: Webhook,
           name: 'settings_integrations_webhook',
-          roles: ['administrator'],
-        },
-        {
-          path: 'dashboard-apps',
-          component: DashboardApps,
-          name: 'settings_integrations_dashboard_apps',
           roles: ['administrator'],
         },
         {

@@ -3,7 +3,7 @@ import { Bar } from 'vue-chartjs';
 const fontFamily =
   '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
 
-const defaultChartOptions = {
+const chartOptions = {
   responsive: true,
   maintainAspectRatio: false,
   legend: {
@@ -11,14 +11,10 @@ const defaultChartOptions = {
       fontFamily,
     },
   },
-  datasets: {
-    bar: {
-      barPercentage: 1.0,
-    },
-  },
   scales: {
     xAxes: [
       {
+        barPercentage: 1.1,
         ticks: {
           fontFamily,
         },
@@ -43,20 +39,8 @@ const defaultChartOptions = {
 
 export default {
   extends: Bar,
-  props: {
-    collection: {
-      type: Object,
-      default: () => {},
-    },
-    chartOptions: {
-      type: Object,
-      default: () => {},
-    },
-  },
+  props: ['collection'],
   mounted() {
-    this.renderChart(this.collection, {
-      ...defaultChartOptions,
-      ...this.chartOptions,
-    });
+    this.renderChart(this.collection, chartOptions);
   },
 };

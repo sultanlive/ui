@@ -21,18 +21,14 @@
         <div class="medium-12 columns">
           <label :class="{ error: $v.content.$error }">
             {{ $t('CANNED_MGMT.ADD.FORM.CONTENT.LABEL') }}
-          </label>
-          <div class="editor-wrap">
-            <woot-message-editor
-              v-model="content"
-              class="message-editor"
-              :class="{ editor_warning: $v.content.$error }"
-              :enable-variables="true"
-              :enable-canned-responses="false"
+            <textarea
+              v-model.trim="content"
+              rows="5"
+              type="text"
               :placeholder="$t('CANNED_MGMT.ADD.FORM.CONTENT.PLACEHOLDER')"
-              @blur="$v.content.$touch"
+              @input="$v.content.$touch"
             />
-          </div>
+          </label>
         </div>
         <div class="modal-footer">
           <div class="medium-12 columns">
@@ -60,21 +56,15 @@ import { required, minLength } from 'vuelidate/lib/validators';
 
 import WootSubmitButton from '../../../../components/buttons/FormSubmitButton';
 import Modal from '../../../../components/Modal';
-import WootMessageEditor from 'dashboard/components/widgets/WootWriter/Editor';
 import alertMixin from 'shared/mixins/alertMixin';
 
 export default {
   components: {
     WootSubmitButton,
     Modal,
-    WootMessageEditor,
   },
   mixins: [alertMixin],
   props: {
-    responseContent: {
-      type: String,
-      default: '',
-    },
     onClose: {
       type: Function,
       default: () => {},
@@ -83,7 +73,10 @@ export default {
   data() {
     return {
       shortCode: '',
-      content: this.responseContent || '',
+      content: '',
+
+      vertical: 'bottom',
+      horizontal: 'center',
       addCanned: {
         showLoading: false,
         message: '',
@@ -131,23 +124,3 @@ export default {
   },
 };
 </script>
-
-<style scoped lang="scss">
-::v-deep {
-  .ProseMirror-menubar {
-    display: none;
-  }
-
-  .ProseMirror-woot-style {
-    min-height: 20rem;
-
-    p {
-      font-size: var(--font-size-default);
-    }
-  }
-
-  .message-editor {
-    border: 1px solid var(--s-200);
-  }
-}
-</style>

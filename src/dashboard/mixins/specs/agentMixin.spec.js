@@ -24,10 +24,7 @@ describe('agentMixin', () => {
       title: 'TestComponent',
       mixins: [agentMixin],
       data() {
-        return {
-          inboxId: 1,
-          currentChat: { meta: { assignee: { name: 'John' } } },
-        };
+        return { inboxId: 1 };
       },
       computed: {
         assignableAgents() {

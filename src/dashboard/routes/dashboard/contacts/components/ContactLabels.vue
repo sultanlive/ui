@@ -24,12 +24,12 @@ export default {
 
   computed: {
     savedLabels() {
-      const availableContactLabels = this.$store.getters[
-        'contactLabels/getContactLabels'
-      ](this.contactId);
-      return this.allLabels.filter(({ title }) =>
-        availableContactLabels.includes(title)
+      const result = this.$store.getters['contactLabels/getContactLabels'](
+        this.contactId
       );
+      return result.map(value => {
+        return this.allLabels.find(label => label.title === value);
+      });
     },
 
     ...mapGetters({

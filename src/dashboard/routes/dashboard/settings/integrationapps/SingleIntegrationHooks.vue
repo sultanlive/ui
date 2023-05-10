@@ -6,11 +6,11 @@
           <div class="integration--image">
             <img :src="'/dashboard/images/integrations/' + integration.logo" />
           </div>
-          <div class="integration--type column">
+          <div class="column">
             <h3 class="integration--title">
               {{ integration.name }}
             </h3>
-            <p>
+            <p class="integration--description">
               {{ integration.description }}
             </p>
           </div>

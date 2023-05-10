@@ -1,5 +1,5 @@
 <template>
-  <div class="flex">
+  <div class="flex overflow-hidden">
     <span
       v-for="(user, index) in users"
       :key="user.id"

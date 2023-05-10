@@ -7,7 +7,7 @@
     :tabindex="disabled ? null : -1"
     :aria-disabled="disabled"
   >
-    <slot />
+    <slot></slot>
   </li>
 </template>
 <script>
@@ -29,22 +29,17 @@ export default {
 <style lang="scss" scoped>
 .dropdown-menu__item {
   list-style: none;
-  margin-bottom: var(--space-micro);
 
   ::v-deep {
     a,
     .button {
-      display: inline-flex;
-      white-space: nowrap;
       width: 100%;
       text-align: left;
-      color: var(--s-700);
+      white-space: nowrap;
+      display: inline-flex;
+      border-radius: var(--border-radius-normal);
 
       &:hover {
-        background: var(--color-background);
-      }
-
-      &:focus {
         background: var(--color-background);
       }
     }

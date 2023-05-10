@@ -25,7 +25,7 @@
           <woot-button
             variant="smooth"
             size="small"
-            icon="edit"
+            icon="ion-compose"
             color-scheme="secondary"
             class="action-button"
             @click="onEdit"

@@ -1,12 +1,10 @@
 <template>
-  <woot-button
-    variant="smooth"
-    class="label--add"
-    icon="add"
-    size="tiny"
-    @click="addLabel"
-  >
-    {{ $t('CONTACT_PANEL.LABELS.CONVERSATION.ADD_BUTTON') }}
+  <woot-button variant="link" class="label--add" @click="addLabel">
+    <woot-label
+      color-scheme="secondary"
+      :title="$t('CONTACT_PANEL.LABELS.CONVERSATION.ADD_BUTTON')"
+      icon="ion-plus-round"
+    />
   </woot-button>
 </template>
 
@@ -22,7 +20,15 @@ export default {
 
 <style lang="scss" scoped>
 .label--add {
-  margin-bottom: var(--space-micro);
-  margin-right: var(--space-micro);
+  &::v-deep .label {
+    cursor: pointer;
+    background: transparent;
+    border-color: var(--s-700);
+    margin: 0;
+
+    &:hover {
+      background: var(--s-50);
+    }
+  }
 }
 </style>

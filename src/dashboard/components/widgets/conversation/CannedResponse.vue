@@ -1,9 +1,5 @@
 <template>
-  <mention-box :items="items" @mention-select="handleMentionClick">
-    <template slot-scope="{ item }">
-      <strong>{{ item.label }}</strong> - {{ item.description }}
-    </template>
-  </mention-box>
+  <mention-box :items="items" @mention-select="handleMentionClick" />
 </template>
 
 <script>

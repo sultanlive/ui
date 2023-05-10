@@ -28,14 +28,11 @@
 <script>
 import { mixin as clickaway } from 'vue-clickaway';
 import { VeTable } from 'vue-easytable';
-import { getCountryFlag } from 'dashboard/helper/flag';
 
 import Spinner from 'shared/components/Spinner.vue';
 import Thumbnail from 'dashboard/components/widgets/Thumbnail.vue';
 import EmptyState from 'dashboard/components/widgets/EmptyState.vue';
 import timeMixin from 'dashboard/mixins/time';
-import rtlMixin from 'shared/mixins/rtlMixin';
-import FluentIcon from 'shared/components/FluentIcon/DashboardIcon';
 
 export default {
   components: {
@@ -43,7 +40,7 @@ export default {
     Spinner,
     VeTable,
   },
-  mixins: [clickaway, timeMixin, rtlMixin],
+  mixins: [clickaway, timeMixin],
   props: {
     contacts: {
       type: Array,
@@ -67,11 +64,11 @@ export default {
     },
     sortParam: {
       type: String,
-      default: 'last_activity_at',
+      default: 'name',
     },
     sortOrder: {
       type: String,
-      default: 'desc',
+      default: 'asc',
     },
   },
   data() {
@@ -93,20 +90,18 @@ export default {
         // as it simplier the sort attribute calculation
         const additional = item.additional_attributes || {};
         const { last_activity_at: lastActivityAt } = item;
-        const { created_at: createdAt } = item;
         return {
           ...item,
           phone_number: item.phone_number || '---',
           company: additional.company_name || '---',
+          location: additional.location || '---',
           profiles: additional.social_profiles || {},
           city: additional.city || '---',
-          country: additional.country,
-          countryCode: additional.country_code,
+          country: additional.country || '---',
           conversationsCount: item.conversations_count || '---',
           last_activity_at: lastActivityAt
             ? this.dynamicTime(lastActivityAt)
             : '---',
-          created_at: createdAt ? this.dynamicTime(createdAt) : '---',
         };
       });
     },
@@ -117,7 +112,7 @@ export default {
           key: 'name',
           title: this.$t('CONTACTS_PAGE.LIST.TABLE_HEADER.NAME'),
           fixed: 'left',
-          align: this.isRTLView ? 'right' : 'left',
+          align: 'left',
           sortBy: this.sortConfig.name || '',
           width: 300,
           renderBodyCell: ({ row }) => (
@@ -133,17 +128,12 @@ export default {
                   status={row.availability_status}
                 />
                 <div class="user-block">
-                  <h6 class="sub-block-title text-truncate">
-                    <router-link
-                      to={`/app/accounts/${this.$route.params.accountId}/contacts/${row.id}`}
-                      class="user-name"
-                    >
-                      {row.name}
-                    </router-link>
+                  <h6 class="sub-block-title user-name text-truncate">
+                    {row.name}
                   </h6>
-                  <button class="button clear small link view-details--button">
+                  <span class="button clear small link">
                     {this.$t('CONTACTS_PAGE.LIST.VIEW_DETAILS')}
-                  </button>
+                  </span>
                 </div>
               </div>
             </woot-button>
@@ -153,7 +143,7 @@ export default {
           field: 'email',
           key: 'email',
           title: this.$t('CONTACTS_PAGE.LIST.TABLE_HEADER.EMAIL_ADDRESS'),
-          align: this.isRTLView ? 'right' : 'left',
+          align: 'left',
           sortBy: this.sortConfig.email || '',
           width: 240,
           renderBodyCell: ({ row }) => {
@@ -177,44 +167,31 @@ export default {
           key: 'phone_number',
           sortBy: this.sortConfig.phone_number || '',
           title: this.$t('CONTACTS_PAGE.LIST.TABLE_HEADER.PHONE_NUMBER'),
-          align: this.isRTLView ? 'right' : 'left',
+          align: 'left',
         },
         {
           field: 'company',
           key: 'company',
-          sortBy: this.sortConfig.company_name || '',
           title: this.$t('CONTACTS_PAGE.LIST.TABLE_HEADER.COMPANY'),
-          align: this.isRTLView ? 'right' : 'left',
+          align: 'left',
         },
         {
           field: 'city',
           key: 'city',
-          sortBy: this.sortConfig.city || '',
           title: this.$t('CONTACTS_PAGE.LIST.TABLE_HEADER.CITY'),
-          align: this.isRTLView ? 'right' : 'left',
+          align: 'left',
         },
         {
           field: 'country',
           key: 'country',
           title: this.$t('CONTACTS_PAGE.LIST.TABLE_HEADER.COUNTRY'),
-          align: this.isRTLView ? 'right' : 'left',
-          sortBy: this.sortConfig.country || '',
-          renderBodyCell: ({ row }) => {
-            if (row.country) {
-              return (
-                <div class="text-truncate">
-                  {`${getCountryFlag(row.countryCode)} ${row.country}`}
-                </div>
-              );
-            }
-            return '---';
-          },
+          align: 'left',
         },
         {
           field: 'profiles',
           key: 'profiles',
           title: this.$t('CONTACTS_PAGE.LIST.TABLE_HEADER.SOCIAL_PROFILES'),
-          align: this.isRTLView ? 'right' : 'left',
+          align: 'left',
           renderBodyCell: ({ row }) => {
             const { profiles } = row;
 
@@ -232,7 +209,7 @@ export default {
                         rel="noopener noreferrer nofollow"
                         href={`https://${profile}.com/${profiles[profile]}`}
                       >
-                        <FluentIcon icon={`brand-${profile}`} />
+                        <i class={`ion-social-${profile}`} />
                       </a>
                     )
                 )}
@@ -245,21 +222,14 @@ export default {
           key: 'last_activity_at',
           sortBy: this.sortConfig.last_activity_at || '',
           title: this.$t('CONTACTS_PAGE.LIST.TABLE_HEADER.LAST_ACTIVITY'),
-          align: this.isRTLView ? 'right' : 'left',
-        },
-        {
-          field: 'created_at',
-          key: 'created_at',
-          sortBy: this.sortConfig.created_at || '',
-          title: this.$t('CONTACTS_PAGE.LIST.TABLE_HEADER.CREATED_AT'),
-          align: this.isRTLView ? 'right' : 'left',
+          align: 'left',
         },
         {
           field: 'conversationsCount',
           key: 'conversationsCount',
           title: this.$t('CONTACTS_PAGE.LIST.TABLE_HEADER.CONVERSATIONS'),
           width: 150,
-          align: this.isRTLView ? 'right' : 'left',
+          align: 'left',
         },
       ];
     },
@@ -302,21 +272,17 @@ export default {
     text-align: left;
 
     .user-block {
-      align-items: flex-start;
-      display: flex;
-      flex-direction: column;
-      margin: 0 var(--space-small);
+      min-width: 0;
+    }
+
+    .user-thumbnail-box {
+      margin-right: var(--space-small);
     }
 
     .user-name {
       font-size: var(--font-size-small);
-      font-weight: var(--font-weight-medium);
       margin: 0;
       text-transform: capitalize;
-    }
-
-    .view-details--button {
-      color: var(--color-body);
     }
 
     .user-email {

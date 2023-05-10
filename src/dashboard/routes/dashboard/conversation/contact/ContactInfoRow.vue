@@ -1,7 +1,7 @@
 <template>
   <div class="contact-info--row">
     <a v-if="href" :href="href" class="contact-info--details">
-      <emoji-or-icon :icon="icon" :emoji="emoji" icon-size="14" />
+      <emoji-or-icon :icon="icon" :emoji="emoji" />
       <span v-if="value" class="text-truncate" :title="value">{{ value }}</span>
       <span v-else class="text-muted">{{
         $t('CONTACT_PANEL.NOT_AVAILABLE')
@@ -10,17 +10,16 @@
       <woot-button
         v-if="showCopy"
         type="submit"
-        variant="clear"
-        size="tiny"
+        variant="link"
         color-scheme="secondary"
-        icon="clipboard"
-        class-names="copy-icon"
+        icon="ion-clipboard"
+        class-names="icon copy-icon"
         @click="onCopy"
       />
     </a>
 
     <div v-else class="contact-info--details">
-      <emoji-or-icon :icon="icon" :emoji="emoji" icon-size="14" />
+      <emoji-or-icon :icon="icon" :emoji="emoji" />
       <span v-if="value" class="text-truncate">{{ value }}</span>
       <span v-else class="text-muted">{{
         $t('CONTACT_PANEL.NOT_AVAILABLE')
@@ -29,9 +28,9 @@
   </div>
 </template>
 <script>
+import copy from 'copy-text-to-clipboard';
 import alertMixin from 'shared/mixins/alertMixin';
 import EmojiOrIcon from 'shared/components/EmojiOrIcon';
-import { copyTextToClipboard } from 'shared/helpers/clipboard';
 
 export default {
   components: {
@@ -61,9 +60,9 @@ export default {
     },
   },
   methods: {
-    async onCopy(e) {
+    onCopy(e) {
       e.preventDefault();
-      await copyTextToClipboard(this.value);
+      copy(this.value);
       this.showAlert(this.$t('CONTACT_PANEL.COPY_SUCCESSFUL'));
     },
   },
@@ -71,8 +70,6 @@ export default {
 </script>
 <style scoped lang="scss">
 .contact-info--row {
-  margin-left: var(--space-minus-smaller);
-
   .contact-info--icon {
     font-size: var(--font-size-default);
     min-width: var(--space-medium);

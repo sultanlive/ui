@@ -1,11 +1,5 @@
 <template>
-  <i v-if="showEmoji" :class="className">{{ iconContent }}</i>
-  <fluent-icon
-    v-else-if="showIcon"
-    :size="iconSize"
-    :icon="icon"
-    :class="className"
-  />
+  <i v-if="showWrap" :class="className">{{ iconContent }}</i>
 </template>
 
 <script>
@@ -15,7 +9,6 @@ import { mapGetters } from 'vuex';
 export default {
   props: {
     icon: { type: String, default: '' },
-    iconSize: { type: [Number, String], default: 20 },
     emoji: { type: String, default: '' },
   },
   computed: {
@@ -29,6 +22,9 @@ export default {
     },
     showIcon() {
       return !this.showEmoji && this.icon;
+    },
+    showWrap() {
+      return this.showEmoji || this.showIcon;
     },
     iconContent() {
       return this.showEmoji ? this.emoji : '';

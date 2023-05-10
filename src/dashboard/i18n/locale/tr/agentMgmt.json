@@ -74,11 +74,6 @@
           "LABEL": "E-posta adresi",
           "PLACEHOLDER": "Lütfen temsilcinin e-posta adresini girin"
         },
-        "AGENT_AVAILABILITY": {
-          "LABEL": "Uygun",
-          "PLACEHOLDER": "Please select an availability status",
-          "ERROR": "Availability is required"
-        },
         "SUBMIT": "Temsilciyi düzenle"
       },
       "BUTTON_TEXT": "Düzenle",
@@ -96,24 +91,6 @@
     },
     "SEARCH": {
       "NO_RESULTS": "Sonuç bulunamadı."
-    },
-    "MULTI_SELECTOR": {
-      "PLACEHOLDER": "Hiç",
-      "TITLE": {
-        "AGENT": "Temsilci seçin",
-        "TEAM": "Takım seçin"
-      },
-      "SEARCH": {
-        "NO_RESULTS": {
-          "AGENT": "Kullanıcı bulunamadı",
-          "TEAM": "Takım bulunamadı"
-        },
-        "PLACEHOLDER": {
-          "AGENT": "Temsilci ara",
-          "TEAM": "Takım ara",
-          "INPUT": "Search for agents"
-        }
-      }
     }
   }
 }

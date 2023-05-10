@@ -1,6 +1,6 @@
 <template>
-  <main class="medium-12 column login">
-    <section class="text-center medium-12 login__hero align-self-top">
+  <div class="medium-12 column login">
+    <div class="text-center medium-12 login__hero align-self-top">
       <img
         :src="globalConfig.logo"
         :alt="globalConfig.installationName"
@@ -11,16 +11,11 @@
           useInstallationName($t('LOGIN.TITLE'), globalConfig.installationName)
         }}
       </h2>
-    </section>
-    <section class="row align-center">
+    </div>
+    <div class="row align-center">
       <div v-if="!email" class="small-12 medium-4 column">
-        <div class="login-box column align-self-top">
-          <GoogleOAuthButton
-            v-if="showGoogleOAuth()"
-            button-size="large"
-            class="oauth-reverse"
-          />
-          <form class="column log-in-form" @submit.prevent="login()">
+        <form class="login-box column align-self-top" @submit.prevent="login()">
+          <div class="column log-in-form">
             <label :class="{ error: $v.credentials.email.$error }">
               {{ $t('LOGIN.EMAIL.LABEL') }}
               <input
@@ -50,11 +45,12 @@
               :button-text="$t('LOGIN.SUBMIT')"
               :loading="loginApi.showLoading"
               button-class="large expanded"
-            />
-          </form>
-        </div>
-        <div class="text-center column sigin__footer">
-          <p v-if="!globalConfig.disableUserProfileUpdate">
+            >
+            </woot-submit-button>
+          </div>
+        </form>
+        <div class="column text-center sigin__footer">
+          <p>
             <router-link to="auth/reset/password">
               {{ $t('LOGIN.FORGOT_PASSWORD') }}
             </router-link>
@@ -67,36 +63,26 @@
         </div>
       </div>
       <woot-spinner v-else size="" />
-    </section>
-  </main>
+    </div>
+  </div>
 </template>
 
 <script>
 import { required, email } from 'vuelidate/lib/validators';
 import globalConfigMixin from 'shared/mixins/globalConfigMixin';
-import WootSubmitButton from 'components/buttons/FormSubmitButton';
+import WootSubmitButton from '../../components/buttons/FormSubmitButton';
 import { mapGetters } from 'vuex';
-import { parseBoolean } from '@chatwoot/utils';
-import GoogleOAuthButton from '../../components/ui/Auth/GoogleOAuthButton.vue';
-
-const ERROR_MESSAGES = {
-  'no-account-found': 'LOGIN.OAUTH.NO_ACCOUNT_FOUND',
-  'business-account-only': 'LOGIN.OAUTH.BUSINESS_ACCOUNTS_ONLY',
-};
 
 export default {
   components: {
     WootSubmitButton,
-    GoogleOAuthButton,
   },
   mixins: [globalConfigMixin],
   props: {
     ssoAuthToken: { type: String, default: '' },
-    ssoAccountId: { type: String, default: '' },
-    ssoConversationId: { type: String, default: '' },
+    redirectUrl: { type: String, default: '' },
     config: { type: String, default: '' },
     email: { type: String, default: '' },
-    authError: { type: String, default: '' },
   },
   data() {
     return {
@@ -133,16 +119,6 @@ export default {
     if (this.ssoAuthToken) {
       this.login();
     }
-    if (this.authError) {
-      const message = ERROR_MESSAGES[this.authError] ?? 'LOGIN.API.UNAUTH';
-      this.showAlert(this.$t(message));
-      // wait for idle state
-      window.requestIdleCallback(() => {
-        // Remove the error query param from the url
-        const { query } = this.$route;
-        this.$router.replace({ query: { ...query, error: undefined } });
-      });
-    }
   },
   methods: {
     showAlert(message) {
@@ -152,21 +128,14 @@ export default {
       bus.$emit('newToastMessage', this.loginApi.message);
     },
     showSignupLink() {
-      return parseBoolean(window.chatwootConfig.signupEnabled);
-    },
-    showGoogleOAuth() {
-      return Boolean(window.chatwootConfig.googleOAuthClientId);
+      return window.chatwootConfig.signupEnabled === 'true';
     },
     login() {
       this.loginApi.showLoading = true;
       const credentials = {
-        email: this.email
-          ? decodeURIComponent(this.email)
-          : this.credentials.email,
+        email: this.email ? this.email : this.credentials.email,
         password: this.credentials.password,
         sso_auth_token: this.ssoAuthToken,
-        ssoAccountId: this.ssoAccountId,
-        ssoConversationId: this.ssoConversationId,
       };
       this.$store
         .dispatch('login', credentials)
@@ -180,17 +149,13 @@ export default {
           }
 
           if (response && response.status === 401) {
-            const { errors } = response.data;
-            const hasAuthErrorMsg =
-              errors &&
-              errors.length &&
-              errors[0] &&
-              typeof errors[0] === 'string';
+						const { errors } = response.data;
+						const hasAuthErrorMsg = errors && errors.length && errors[0] && typeof errors[0] === 'string';
             if (hasAuthErrorMsg) {
               this.showAlert(errors[0]);
             } else {
-              this.showAlert(this.$t('LOGIN.API.UNAUTH'));
-            }
+							this.showAlert(this.$t('LOGIN.API.UNAUTH'));
+						} 
             return;
           }
           this.showAlert(this.$t('LOGIN.API.ERROR_MESSAGE'));
@@ -199,10 +164,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss" scoped>
-.oauth-reverse {
-  display: flex;
-  flex-direction: column-reverse;
-}
-</style>

@@ -1,23 +1,11 @@
-import { sendMessage } from 'widget/helpers/utils';
 import ContactsAPI from '../../api/contacts';
-import { SET_USER_ERROR } from '../../constants/errorTypes';
-import { setHeader } from '../../helpers/axios';
+import { refreshActionCableConnector } from '../../helpers/actionCable';
+
 const state = {
   currentUser: {},
 };
 
 const SET_CURRENT_USER = 'SET_CURRENT_USER';
-const parseErrorData = error =>
-  error && error.response && error.response.data ? error.response.data : error;
-export const updateWidgetAuthToken = widgetAuthToken => {
-  if (widgetAuthToken) {
-    setHeader(widgetAuthToken);
-    sendMessage({
-      event: 'setAuthCookie',
-      data: { widgetAuthToken },
-    });
-  }
-};
 
 export const getters = {
   getCurrentUser(_state) {
@@ -34,71 +22,34 @@ export const actions = {
       // Ignore error
     }
   },
-  update: async ({ dispatch }, { user }) => {
+  update: async ({ dispatch }, { identifier, user: userObject }) => {
     try {
-      await ContactsAPI.update(user);
-      dispatch('get');
-    } catch (error) {
-      // Ignore error
-    }
-  },
-  setUser: async ({ dispatch }, { identifier, user: userObject }) => {
-    try {
-      const {
-        email,
-        name,
-        avatar_url,
-        identifier_hash: identifierHash,
-        phone_number,
-        company_name,
-        city,
-        country_code,
-        description,
-        custom_attributes,
-        social_profiles,
-      } = userObject;
       const user = {
-        email,
-        name,
-        avatar_url,
-        identifier_hash: identifierHash,
-        phone_number,
-        additional_attributes: {
-          company_name,
-          city,
-          description,
-          country_code,
-          social_profiles,
-        },
-        custom_attributes,
+        email: userObject.email,
+        name: userObject.name,
+        avatar_url: userObject.avatar_url,
+        identifier_hash: userObject.identifier_hash,
       };
       const {
-        data: { widget_auth_token: widgetAuthToken },
-      } = await ContactsAPI.setUser(identifier, user);
-      updateWidgetAuthToken(widgetAuthToken);
+        data: { pubsub_token: pubsubToken },
+      } = await ContactsAPI.update(identifier, user);
+
       dispatch('get');
-      if (identifierHash || widgetAuthToken) {
+      if (userObject.identifier_hash) {
         dispatch('conversation/clearConversations', {}, { root: true });
         dispatch('conversation/fetchOldConversations', {}, { root: true });
-        dispatch('conversationAttributes/getAttributes', {}, { root: true });
       }
+
+      refreshActionCableConnector(pubsubToken);
     } catch (error) {
-      const data = parseErrorData(error);
-      sendMessage({ event: 'error', errorType: SET_USER_ERROR, data });
+      // Ingore error
     }
   },
   setCustomAttributes: async (_, customAttributes = {}) => {
     try {
-      await ContactsAPI.setCustomAttributes(customAttributes);
+      await ContactsAPI.setCustomAttibutes(customAttributes);
     } catch (error) {
-      // Ignore error
-    }
-  },
-  deleteCustomAttribute: async (_, customAttribute) => {
-    try {
-      await ContactsAPI.deleteCustomAttribute(customAttribute);
-    } catch (error) {
-      // Ignore error
+      // Ingore error
     }
   },
 };

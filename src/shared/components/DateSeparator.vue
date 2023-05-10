@@ -1,18 +1,12 @@
 <template>
-  <div
-    class="date--separator"
-    :class="$dm('text-slate-700', 'dark:text-slate-200')"
-  >
+  <div class="date--separator">
     {{ formattedDate }}
   </div>
 </template>
 
 <script>
 import { formatDate } from 'shared/helpers/DateHelper';
-import darkModeMixin from 'widget/mixins/darkModeMixin.js';
-
 export default {
-  mixins: [darkModeMixin],
   props: {
     date: {
       type: String,
@@ -36,6 +30,7 @@ export default {
 
 .date--separator {
   font-size: $font-size-default;
+  color: $color-body;
   height: 50px;
   line-height: 50px;
   position: relative;

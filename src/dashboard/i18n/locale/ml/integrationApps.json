@@ -30,7 +30,7 @@
     },
     "LIST": {
       "FETCHING": "Fetching integration hooks",
-      "INBOX": "ഇൻബോക്സ്",
+      "INBOX": "Inbox",
       "DELETE": {
         "BUTTON_TEXT": "ഇല്ലാതാക്കുക"
       }

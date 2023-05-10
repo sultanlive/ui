@@ -1,14 +1,14 @@
 <template>
-  <div class="file message-text__wrap">
+  <div class="file message-text__wrap" @click="openLink">
     <div class="icon-wrap">
-      <fluent-icon icon="document" class="file--icon" size="32" />
+      <i class="ion-document-text"></i>
     </div>
     <div class="meta">
       <h5 class="text-block-title">
         {{ decodeURI(fileName) }}
       </h5>
       <a
-        class="download clear link button small"
+        class="download clear button small"
         rel="noreferrer noopener nofollow"
         target="_blank"
         :href="url"
@@ -29,17 +29,14 @@ export default {
   },
   computed: {
     fileName() {
-      if (this.url) {
-        const filename = this.url.substring(this.url.lastIndexOf('/') + 1);
-        return filename || this.$t('CONVERSATION.UNKNOWN_FILE_TYPE');
-      }
-      return this.$t('CONVERSATION.UNKNOWN_FILE_TYPE');
+      const filename = this.url.substring(this.url.lastIndexOf('/') + 1);
+      return filename;
     },
   },
   methods: {
     openLink() {
       const win = window.open(this.url, '_blank', 'noopener');
-      if (win) win.focus();
+      win.focus();
     },
   },
 };

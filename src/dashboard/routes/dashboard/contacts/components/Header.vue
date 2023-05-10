@@ -2,14 +2,13 @@
   <header class="header">
     <div class="table-actions-wrap">
       <div class="left-aligned-wrap">
-        <woot-sidemenu-icon />
-        <h1 class="page-title header-title">
-          {{ headerTitle }}
+        <h1 class="page-title">
+          {{ headerTitle ? `#${headerTitle}` : $t('CONTACTS_PAGE.HEADER') }}
         </h1>
       </div>
       <div class="right-aligned-wrap">
         <div class="search-wrap">
-          <fluent-icon icon="search" class="search-icon" />
+          <i class="ion-ios-search-strong search-icon" />
           <input
             type="text"
             :placeholder="$t('CONTACTS_PAGE.SEARCH_INPUT_PLACEHOLDER')"
@@ -20,63 +19,19 @@
           />
           <woot-button
             :is-loading="false"
-            class="clear"
             :class-names="searchButtonClass"
             @click="onSearchSubmit"
           >
             {{ $t('CONTACTS_PAGE.SEARCH_BUTTON') }}
           </woot-button>
         </div>
-        <woot-button
-          v-if="hasActiveSegments"
-          class="margin-right-1 clear"
-          color-scheme="alert"
-          icon="delete"
-          @click="onToggleDeleteSegmentsModal"
-        >
-          {{ $t('CONTACTS_PAGE.FILTER_CONTACTS_DELETE') }}
-        </woot-button>
-        <div v-if="!hasActiveSegments" class="filters__button-wrap">
-          <div v-if="hasAppliedFilters" class="filters__applied-indicator" />
-          <woot-button
-            class="margin-right-1 clear"
-            color-scheme="secondary"
-            data-testid="create-new-contact"
-            icon="filter"
-            @click="onToggleFilter"
-          >
-            {{ $t('CONTACTS_PAGE.FILTER_CONTACTS') }}
-          </woot-button>
-        </div>
 
         <woot-button
-          v-if="hasAppliedFilters && !hasActiveSegments"
-          class="margin-right-1 clear"
-          color-scheme="alert"
-          variant="clear"
-          icon="save"
-          @click="onToggleSegmentsModal"
-        >
-          {{ $t('CONTACTS_PAGE.FILTER_CONTACTS_SAVE') }}
-        </woot-button>
-        <woot-button
-          class="margin-right-1 clear"
           color-scheme="success"
-          icon="person-add"
-          data-testid="create-new-contact"
+          icon="ion-android-add-circle"
           @click="onToggleCreate"
         >
           {{ $t('CREATE_CONTACT.BUTTON_LABEL') }}
-        </woot-button>
-
-        <woot-button
-          v-if="isAdmin"
-          color-scheme="info"
-          icon="upload"
-          class="clear"
-          @click="onToggleImport"
-        >
-          {{ $t('IMPORT_CONTACTS.BUTTON_LABEL') }}
         </woot-button>
       </div>
     </div>
@@ -84,11 +39,8 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
-import adminMixin from 'dashboard/mixins/isAdmin';
-
 export default {
-  mixins: [adminMixin],
+  components: {},
   props: {
     headerTitle: {
       type: String,
@@ -97,10 +49,6 @@ export default {
     searchQuery: {
       type: String,
       default: '',
-    },
-    segmentsId: {
-      type: [String, Number],
-      default: 0,
     },
     onInputSearch: {
       type: Function,
@@ -114,41 +62,15 @@ export default {
       type: Function,
       default: () => {},
     },
-    onToggleImport: {
-      type: Function,
-      default: () => {},
-    },
-    onToggleFilter: {
-      type: Function,
-      default: () => {},
-    },
   },
   data() {
     return {
       showCreateModal: false,
-      showImportModal: false,
     };
   },
   computed: {
     searchButtonClass() {
       return this.searchQuery !== '' ? 'show' : '';
-    },
-    ...mapGetters({
-      getAppliedContactFilters: 'contacts/getAppliedContactFilters',
-    }),
-    hasAppliedFilters() {
-      return this.getAppliedContactFilters.length;
-    },
-    hasActiveSegments() {
-      return this.segmentsId !== 0;
-    },
-  },
-  methods: {
-    onToggleSegmentsModal() {
-      this.$emit('on-toggle-save-filter');
-    },
-    onToggleDeleteSegmentsModal() {
-      this.$emit('on-toggle-delete-filter');
     },
   },
 };
@@ -170,15 +92,6 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  max-width: 100%;
-  min-width: var(--space-mega);
-
-  .header-title {
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
-    margin: 0 var(--space-small);
-  }
 }
 
 .right-aligned-wrap {
@@ -186,13 +99,11 @@ export default {
 }
 
 .search-wrap {
-  max-width: 400px;
-  min-width: 150px;
+  width: 400px;
   display: flex;
   align-items: center;
   position: relative;
   margin-right: var(--space-small);
-  margin-left: var(--space-small);
 
   .search-icon {
     position: absolute;
@@ -228,19 +139,6 @@ export default {
     opacity: 1;
     transform: translateX(0);
     visibility: visible;
-  }
-}
-.filters__button-wrap {
-  position: relative;
-
-  .filters__applied-indicator {
-    position: absolute;
-    height: var(--space-small);
-    width: var(--space-small);
-    top: var(--space-smaller);
-    right: var(--space-slab);
-    background-color: var(--s-500);
-    border-radius: var(--border-radius-rounded);
   }
 }
 </style>

@@ -3,17 +3,12 @@
     <div class="integration--image">
       <img :src="'/dashboard/images/integrations/' + integrationLogo" />
     </div>
-    <div class="integration--type column">
+    <div class="column">
       <h3 class="integration--title">
         {{ integrationName }}
       </h3>
-      <p>
-        {{
-          useInstallationName(
-            integrationDescription,
-            globalConfig.installationName
-          )
-        }}
+      <p class="integration--description">
+        {{ integrationDescription }}
       </p>
     </div>
     <div class="small-2 column button-wrap">
@@ -31,7 +26,7 @@
                 :button-text="
                   $t('INTEGRATION_SETTINGS.WEBHOOK.DELETE.BUTTON_TEXT')
                 "
-                icon-class="dismiss-circle"
+                icon-class="ion-close-circled"
                 button-class="nice alert"
               />
             </div>
@@ -64,21 +59,17 @@
 import { mapGetters } from 'vuex';
 import { frontendURL } from '../../../../helper/URLHelper';
 import alertMixin from 'shared/mixins/alertMixin';
-import globalConfigMixin from 'shared/mixins/globalConfigMixin';
 
 export default {
-  mixins: [alertMixin, globalConfigMixin],
-  props: {
-    integrationId: {
-      type: [String, Number],
-      required: true,
-    },
-    integrationLogo: { type: String, default: '' },
-    integrationName: { type: String, default: '' },
-    integrationDescription: { type: String, default: '' },
-    integrationEnabled: { type: Boolean, default: false },
-    integrationAction: { type: String, default: '' },
-  },
+  mixins: [alertMixin],
+  props: [
+    'integrationId',
+    'integrationLogo',
+    'integrationName',
+    'integrationDescription',
+    'integrationEnabled',
+    'integrationAction',
+  ],
   data() {
     return {
       showDeleteConfirmationPopup: false,
@@ -88,7 +79,6 @@ export default {
     ...mapGetters({
       currentUser: 'getCurrentUser',
       accountId: 'getCurrentAccountId',
-      globalConfig: 'globalConfig/get',
     }),
   },
   methods: {

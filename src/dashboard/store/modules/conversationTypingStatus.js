@@ -12,9 +12,9 @@ export const getters = {
 };
 
 export const actions = {
-  toggleTyping: async (_, { status, conversationId, isPrivate }) => {
+  toggleTyping: async (_, { status, conversationId }) => {
     try {
-      await ConversationAPI.toggleTyping({ status, conversationId, isPrivate });
+      await ConversationAPI.toggleTyping({ status, conversationId });
     } catch (error) {
       // Handle error
     }

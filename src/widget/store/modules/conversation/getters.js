@@ -1,5 +1,5 @@
 import { MESSAGE_TYPE } from 'widget/helpers/constants';
-import { groupBy } from 'widget/helpers/utils';
+import groupBy from 'lodash.groupby';
 import { groupConversationBySender } from './helpers';
 import { formatUnixDate } from 'shared/helpers/DateHelper';
 
@@ -32,7 +32,7 @@ export const getters = {
   },
   getUnreadMessageCount: _state => {
     const { userLastSeenAt } = _state.meta;
-    return Object.values(_state.conversations).filter(chat => {
+    const count = Object.values(_state.conversations).filter(chat => {
       const { created_at: createdAt, message_type: messageType } = chat;
       const isOutGoing = messageType === MESSAGE_TYPE.OUTGOING;
       const hasNotSeen = userLastSeenAt
@@ -40,6 +40,7 @@ export const getters = {
         : true;
       return hasNotSeen && isOutGoing;
     }).length;
+    return count;
   },
   getUnreadTextMessages: (_state, _getters) => {
     const unreadCount = _getters.getUnreadMessageCount;
@@ -49,6 +50,7 @@ export const getters = {
       return messageType === MESSAGE_TYPE.OUTGOING;
     });
     const maxUnreadCount = Math.min(unreadCount, 3);
-    return unreadAgentMessages.splice(-maxUnreadCount);
+    const allUnreadMessages = unreadAgentMessages.splice(-maxUnreadCount);
+    return allUnreadMessages;
   },
 };

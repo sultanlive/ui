@@ -1,63 +1,63 @@
 {
   "LABEL_MGMT": {
-    "HEADER": "ป้ายกำกับ",
-    "HEADER_BTN_TXT": "เพิ่มป้ายกำกับ",
-    "LOADING": "กำลังโหลดป้ายกำกับ",
+    "HEADER": "Labels",
+    "HEADER_BTN_TXT": "Add label",
+    "LOADING": "Fetching labels",
     "SEARCH_404": "ไม่มีรายการที่ตรงกับเนื้อหานี้",
-    "SIDEBAR_TXT": "<p><b>ป้ายกำกับ</b><p> ป้ายกำกับช่วยให้คุณจัดกลุ่มและลำดับความสำคัญของการสนทนา คุณสามารถติดป้ายกำกับให้กับการสนทนาได้จากหน้าต่างด้านขวา <br /><br /> ป้ายกำกับผูกกับบัญชีและสามารถใช้เพื่อสร้างระบบการทำงานในบริษัทของคุณ คุณยังสามารถปรับแต่งสีของป้ายกำกับได้ซึ่งช่วยให้มองเห็นป้ายได้ง่ายขึ้น ป้ายกำกับที่สร้างขึ้นจะแสดงบนเมนูข้าง",
+    "SIDEBAR_TXT": "<p><b>Labels</b> <p>Labels help you to categorize conversations and prioritize them. You can assign label to a conversation from the sidepanel. <br /><br />Labels are tied to the account and can be used to create custom workflows in your organization. You can assign custom color to a label, it makes it easier to identify the label. You will be able to display the label on the sidebar to filter the conversations easily.</p>",
     "LIST": {
-      "404": "ไม่มีป้ายกำกับในบัญชีนี้",
-      "TITLE": "จัดการป้ายกำกับ",
-      "DESC": "ป้ายกำกับช่วยให้คุณจัดกลุ่มการสนทนาได้",
+      "404": "There are no labels available in this account.",
+      "TITLE": "Manage labels",
+      "DESC": "Labels let you group the conversations together.",
       "TABLE_HEADER": [
         "ชื่อ",
-        "คำอธิบาย",
-        "สี"
+        "Description",
+        "Color"
       ]
     },
     "FORM": {
       "NAME": {
-        "LABEL": "ชื่อป้ายกำกับ",
-        "PLACEHOLDER": "ชื่อป้ายกำกับ",
-        "REQUIRED_ERROR": "โปรดใส่ชื่อป้ายกำกับ",
-        "MINIMUM_LENGTH_ERROR": "ชื่อป้ายกำกับต้องยาวอย่างน้อย 2 ตัวอักษร",
-        "VALID_ERROR": "ชื่อป้ายกำกับต้องเป็นตัวอักษรภาษาอังกฤษ ตัวเลข ขีดกลาง'-' และ ขีดล่าง'_' เท่านั้น"
+        "LABEL": "Label Name",
+        "PLACEHOLDER": "Label name",
+        "REQUIRED_ERROR": "Label name is required",
+        "MINIMUM_LENGTH_ERROR": "Minimum length 2 is required",
+        "VALID_ERROR": "Only Alphabets, Numbers, Hyphen and Underscore are allowed"
       },
       "DESCRIPTION": {
-        "LABEL": "คำอธิบาย",
-        "PLACEHOLDER": "คำอธิบายป้ายกำกับ"
+        "LABEL": "Description",
+        "PLACEHOLDER": "Label Description"
       },
       "COLOR": {
-        "LABEL": "สี"
+        "LABEL": "Color"
       },
       "SHOW_ON_SIDEBAR": {
-        "LABEL": "แสดงป้ายกำกับบนเมนูข้าง"
+        "LABEL": "Show label on sidebar"
       },
       "EDIT": "เเก้ไข",
-      "CREATE": "สร้าง",
+      "CREATE": "Create",
       "DELETE": "ลบ",
       "CANCEL": "ยกเลิก"
     },
     "ADD": {
-      "TITLE": "เพิ่มป้ายกำกับ",
-      "DESC": "ป้ายกำกับช่วยให้คุณจัดกลุ่มการสนทนาได้",
+      "TITLE": "Add label",
+      "DESC": "Labels let you group the conversations together.",
       "API": {
-        "SUCCESS_MESSAGE": "เพิ่มป้ายกำกับสำเร็จแล้ว",
-        "ERROR_MESSAGE": "เกิดข้อผิดพลาดกรุณาลองใหม่อีกครั้ง"
+        "SUCCESS_MESSAGE": "Label added successfully",
+        "ERROR_MESSAGE": "There was an error, please try again"
       }
     },
     "EDIT": {
-      "TITLE": "แก้ไขป้ายกำกับ",
+      "TITLE": "Edit label",
       "API": {
-        "SUCCESS_MESSAGE": "อัปเดตป้ายกำกับสำเร็จแล้ว",
-        "ERROR_MESSAGE": "เกิดข้อผิดพลาดกรุณาลองใหม่อีกครั้ง"
+        "SUCCESS_MESSAGE": "Label updated successfully",
+        "ERROR_MESSAGE": "There was an error, please try again"
       }
     },
     "DELETE": {
       "BUTTON_TEXT": "ลบ",
       "API": {
-        "SUCCESS_MESSAGE": "ลบป้ายกำกับสำเร็จแล้ว",
-        "ERROR_MESSAGE": "เกิดข้อผิดพลาดกรุณาลองใหม่อีกครั้ง"
+        "SUCCESS_MESSAGE": "Label deleted successfully",
+        "ERROR_MESSAGE": "There was an error, please try again"
       },
       "CONFIRM": {
         "TITLE": "ยืนยันการลบ",

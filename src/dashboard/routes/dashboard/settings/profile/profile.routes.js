@@ -10,10 +10,9 @@ export default {
       roles: ['administrator', 'agent'],
       component: SettingsContent,
       props: {
-        headerTitle: 'PROFILE_SETTINGS.TITLE',
-        icon: 'edit',
+        headerTitle: 'GENERAL_SETTINGS.TITLE',
+        icon: 'ion-compose',
         showNewButton: false,
-        showSidemenuIcon: false,
       },
       children: [
         {

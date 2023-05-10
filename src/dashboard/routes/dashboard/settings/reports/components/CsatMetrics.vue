@@ -103,6 +103,6 @@ export default {
 }
 
 .emoji--distribution-key {
-  margin: 0 var(--space-micro);
+  margin-right: var(--space-micro);
 }
 </style>

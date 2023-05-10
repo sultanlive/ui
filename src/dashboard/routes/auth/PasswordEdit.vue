@@ -38,7 +38,8 @@
         :button-text="$t('SET_NEW_PASSWORD.SUBMIT')"
         :loading="newPasswordAPI.showLoading"
         button-class="expanded"
-      />
+      >
+      </woot-submit-button>
       <!-- <input type="submit" class="button " v-on:click.prevent="login()" v-bind:value="" > -->
     </div>
   </form>
@@ -49,16 +50,16 @@ import { required, minLength } from 'vuelidate/lib/validators';
 import Auth from '../../api/auth';
 
 import WootSubmitButton from '../../components/buttons/FormSubmitButton';
-import { DEFAULT_REDIRECT_URL } from 'dashboard/constants/globals';
+import { DEFAULT_REDIRECT_URL } from '../../constants';
 
 export default {
   components: {
     WootSubmitButton,
   },
   props: {
-    resetPasswordToken: { type: String, default: '' },
-    redirectUrl: { type: String, default: '' },
-    config: { type: String, default: '' },
+    resetPasswordToken: String,
+    redirectUrl: String,
+    config: String,
   },
   data() {
     return {

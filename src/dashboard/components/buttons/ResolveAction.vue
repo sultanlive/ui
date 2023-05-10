@@ -5,10 +5,10 @@
         v-if="isOpen"
         class-names="resolve"
         color-scheme="success"
-        icon="checkmark"
+        icon="ion-checkmark"
         emoji="✅"
         :is-loading="isLoading"
-        @click="onCmdResolveConversation"
+        @click="() => toggleStatus(STATUS_TYPE.RESOLVED)"
       >
         {{ this.$t('CONVERSATION.HEADER.RESOLVE_ACTION') }}
       </woot-button>
@@ -16,94 +16,46 @@
         v-else-if="isResolved"
         class-names="resolve"
         color-scheme="warning"
-        icon="arrow-redo"
+        icon="ion-refresh"
         emoji="👀"
         :is-loading="isLoading"
-        @click="onCmdOpenConversation"
+        @click="() => toggleStatus(STATUS_TYPE.OPEN)"
       >
         {{ this.$t('CONVERSATION.HEADER.REOPEN_ACTION') }}
       </woot-button>
       <woot-button
-        v-else-if="showOpenButton"
+        v-else-if="isBot"
         class-names="resolve"
         color-scheme="primary"
-        icon="person"
+        icon="ion-person"
         :is-loading="isLoading"
-        @click="onCmdOpenConversation"
+        @click="() => toggleStatus(STATUS_TYPE.OPEN)"
       >
         {{ this.$t('CONVERSATION.HEADER.OPEN_ACTION') }}
       </woot-button>
       <woot-button
-        v-if="showAdditionalActions"
-        ref="arrowDownButton"
+        v-if="showDropDown"
         :color-scheme="buttonClass"
         :disabled="isLoading"
-        icon="chevron-down"
+        icon="ion-arrow-down-b"
         emoji="🔽"
         @click="openDropdown"
       />
     </div>
     <div
-      v-if="showActionsDropdown"
+      v-if="showDropdown"
       v-on-clickaway="closeDropdown"
       class="dropdown-pane dropdown-pane--open"
     >
       <woot-dropdown-menu>
-        <woot-dropdown-item v-if="!isPending">
+        <woot-dropdown-item v-if="!isBot">
           <woot-button
             variant="clear"
-            color-scheme="secondary"
-            size="small"
-            icon="book-clock"
-            @click="() => toggleStatus(STATUS_TYPE.PENDING)"
+            @click="() => toggleStatus(STATUS_TYPE.BOT)"
           >
-            {{ this.$t('CONVERSATION.RESOLVE_DROPDOWN.MARK_PENDING') }}
+            {{ this.$t('CONVERSATION.RESOLVE_DROPDOWN.OPEN_BOT') }}
           </woot-button>
         </woot-dropdown-item>
-
-        <woot-dropdown-divider v-if="isOpen" />
-        <woot-dropdown-sub-menu
-          v-if="isOpen"
-          :title="this.$t('CONVERSATION.RESOLVE_DROPDOWN.SNOOZE.TITLE')"
-        >
-          <woot-dropdown-item>
-            <woot-button
-              variant="clear"
-              color-scheme="secondary"
-              size="small"
-              icon="send-clock"
-              @click="() => toggleStatus(STATUS_TYPE.SNOOZED, null)"
-            >
-              {{ this.$t('CONVERSATION.RESOLVE_DROPDOWN.SNOOZE.NEXT_REPLY') }}
-            </woot-button>
-          </woot-dropdown-item>
-          <woot-dropdown-item>
-            <woot-button
-              variant="clear"
-              color-scheme="secondary"
-              size="small"
-              icon="dual-screen-clock"
-              @click="
-                () => toggleStatus(STATUS_TYPE.SNOOZED, snoozeTimes.tomorrow)
-              "
-            >
-              {{ this.$t('CONVERSATION.RESOLVE_DROPDOWN.SNOOZE.TOMORROW') }}
-            </woot-button>
-          </woot-dropdown-item>
-          <woot-dropdown-item>
-            <woot-button
-              variant="clear"
-              color-scheme="secondary"
-              size="small"
-              icon="calendar-clock"
-              @click="
-                () => toggleStatus(STATUS_TYPE.SNOOZED, snoozeTimes.nextWeek)
-              "
-            >
-              {{ this.$t('CONVERSATION.RESOLVE_DROPDOWN.SNOOZE.NEXT_WEEK') }}
-            </woot-button>
-          </woot-dropdown-item>
-        </woot-dropdown-sub-menu>
       </woot-dropdown-menu>
     </div>
   </div>
@@ -113,139 +65,62 @@
 import { mapGetters } from 'vuex';
 import { mixin as clickaway } from 'vue-clickaway';
 import alertMixin from 'shared/mixins/alertMixin';
-import snoozeTimesMixin from 'dashboard/mixins/conversation/snoozeTimesMixin.js';
-import eventListenerMixins from 'shared/mixins/eventListenerMixins';
-import {
-  hasPressedAltAndEKey,
-  hasPressedCommandPlusAltAndEKey,
-  hasPressedAltAndMKey,
-} from 'shared/helpers/KeyboardHelpers';
 
 import WootDropdownItem from 'shared/components/ui/dropdown/DropdownItem.vue';
-import WootDropdownSubMenu from 'shared/components/ui/dropdown/DropdownSubMenu.vue';
 import WootDropdownMenu from 'shared/components/ui/dropdown/DropdownMenu.vue';
-import WootDropdownDivider from 'shared/components/ui/dropdown/DropdownDivider';
-
-import wootConstants from 'dashboard/constants/globals';
-import {
-  CMD_REOPEN_CONVERSATION,
-  CMD_RESOLVE_CONVERSATION,
-  CMD_SNOOZE_CONVERSATION,
-} from '../../routes/dashboard/commands/commandBarBusEvents';
+import wootConstants from '../../constants';
 
 export default {
   components: {
     WootDropdownItem,
     WootDropdownMenu,
-    WootDropdownSubMenu,
-    WootDropdownDivider,
   },
-  mixins: [clickaway, alertMixin, eventListenerMixins, snoozeTimesMixin],
+  mixins: [clickaway, alertMixin],
   props: { conversationId: { type: [String, Number], required: true } },
   data() {
     return {
       isLoading: false,
-      showActionsDropdown: false,
+      showDropdown: false,
       STATUS_TYPE: wootConstants.STATUS_TYPE,
     };
   },
   computed: {
-    ...mapGetters({ currentChat: 'getSelectedChat' }),
+    ...mapGetters({
+      currentChat: 'getSelectedChat',
+    }),
     isOpen() {
       return this.currentChat.status === wootConstants.STATUS_TYPE.OPEN;
     },
-    isPending() {
-      return this.currentChat.status === wootConstants.STATUS_TYPE.PENDING;
+    isBot() {
+      return this.currentChat.status === wootConstants.STATUS_TYPE.BOT;
     },
     isResolved() {
       return this.currentChat.status === wootConstants.STATUS_TYPE.RESOLVED;
     },
-    isSnoozed() {
-      return this.currentChat.status === wootConstants.STATUS_TYPE.SNOOZED;
-    },
     buttonClass() {
-      if (this.isPending) return 'primary';
+      if (this.isBot) return 'primary';
       if (this.isOpen) return 'success';
       if (this.isResolved) return 'warning';
       return '';
     },
-    showAdditionalActions() {
-      return !this.isPending && !this.isSnoozed;
+    showDropDown() {
+      return !this.isBot;
     },
-  },
-  mounted() {
-    bus.$on(CMD_SNOOZE_CONVERSATION, this.onCmdSnoozeConversation);
-    bus.$on(CMD_REOPEN_CONVERSATION, this.onCmdOpenConversation);
-    bus.$on(CMD_RESOLVE_CONVERSATION, this.onCmdResolveConversation);
-  },
-  destroyed() {
-    bus.$off(CMD_SNOOZE_CONVERSATION, this.onCmdSnoozeConversation);
-    bus.$off(CMD_REOPEN_CONVERSATION, this.onCmdOpenConversation);
-    bus.$off(CMD_RESOLVE_CONVERSATION, this.onCmdResolveConversation);
   },
   methods: {
-    async handleKeyEvents(e) {
-      const allConversations = document.querySelectorAll(
-        '.conversations-list .conversation'
-      );
-      if (hasPressedAltAndMKey(e)) {
-        if (this.$refs.arrowDownButton) {
-          this.$refs.arrowDownButton.$el.click();
-        }
-      }
-      if (hasPressedAltAndEKey(e)) {
-        const activeConversation = document.querySelector(
-          'div.conversations-list div.conversation.active'
-        );
-        const activeConversationIndex = [...allConversations].indexOf(
-          activeConversation
-        );
-        const lastConversationIndex = allConversations.length - 1;
-        try {
-          await this.toggleStatus(wootConstants.STATUS_TYPE.RESOLVED);
-        } catch (error) {
-          // error
-        }
-        if (hasPressedCommandPlusAltAndEKey(e)) {
-          if (activeConversationIndex < lastConversationIndex) {
-            allConversations[activeConversationIndex + 1].click();
-          } else if (allConversations.length > 1) {
-            allConversations[0].click();
-            document.querySelector('.conversations-list').scrollTop = 0;
-          }
-          e.preventDefault();
-        }
-      }
-    },
-    onCmdSnoozeConversation(snoozeType) {
-      this.toggleStatus(
-        this.STATUS_TYPE.SNOOZED,
-        this.snoozeTimes[snoozeType] || null
-      );
-    },
-    onCmdOpenConversation() {
-      this.toggleStatus(this.STATUS_TYPE.OPEN);
-    },
-    onCmdResolveConversation() {
-      this.toggleStatus(this.STATUS_TYPE.RESOLVED);
-    },
-    showOpenButton() {
-      return this.isResolved || this.isSnoozed;
-    },
     closeDropdown() {
-      this.showActionsDropdown = false;
+      this.showDropdown = false;
     },
     openDropdown() {
-      this.showActionsDropdown = true;
+      this.showDropdown = true;
     },
-    toggleStatus(status, snoozedUntil) {
+    toggleStatus(status) {
       this.closeDropdown();
       this.isLoading = true;
       this.$store
         .dispatch('toggleStatus', {
           conversationId: this.currentChat.id,
           status,
-          snoozedUntil,
         })
         .then(() => {
           this.showAlert(this.$t('CONVERSATION.CHANGE_STATUS'));
@@ -269,6 +144,5 @@ export default {
   margin-top: var(--space-micro);
   right: 0;
   max-width: 20rem;
-  min-width: 15.6rem;
 }
 </style>

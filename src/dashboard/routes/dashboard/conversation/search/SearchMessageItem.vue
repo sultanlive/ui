@@ -5,16 +5,12 @@
         <div class="name-wrap">
           <span class="text-block-title">{{ userName }}</span>
           <div>
-            <fluent-icon
-              v-if="isOutgoingMessage"
-              icon="arrow-reply"
-              class="icon-outgoing"
-            />
+            <i v-if="isOutgoingMessage" class="ion-headphone" />
           </div>
         </div>
         <span class="timestamp">{{ readableTime }} </span>
       </div>
-      <p v-dompurify-html="prepareContent(content)" class="message-content" />
+      <p class="message-content" v-html="prepareContent(content)"></p>
     </div>
   </div>
 </template>
@@ -64,15 +60,10 @@ export default {
   methods: {
     prepareContent(content = '') {
       const plainTextContent = this.getPlainText(content);
-      const escapedSearchTerm = this.escapeRegExp(this.searchTerm);
       return plainTextContent.replace(
-        new RegExp(`(${escapedSearchTerm})`, 'ig'),
+        new RegExp(`(${this.searchTerm})`, 'ig'),
         '<span class="searchkey--highlight">$1</span>'
       );
-    },
-    // from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#escaping
-    escapeRegExp(string) {
-      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     },
   },
 };
@@ -93,7 +84,7 @@ export default {
       color: var(--white);
       text-decoration: underline;
     }
-    .icon-outgoing {
+    .ion-headphone {
       color: var(--white);
     }
   }
@@ -128,8 +119,9 @@ export default {
   }
 }
 
-.icon-outgoing {
+.ion-headphone {
   color: var(--w-500);
+  font-size: var(--font-size-mini);
   padding: var(--space-micro);
   padding-right: var(--space-smaller);
 }

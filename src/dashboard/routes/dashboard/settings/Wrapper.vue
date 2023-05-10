@@ -8,12 +8,10 @@
       :show-back-button="showBackButton"
       :back-url="backUrl"
       :show-new-button="showNewButton"
-      :show-sidemenu-icon="showSidemenuIcon"
     />
-    <keep-alive v-if="keepAlive">
-      <router-view />
+    <keep-alive>
+      <router-view></router-view>
     </keep-alive>
-    <router-view v-else />
   </div>
 </template>
 
@@ -26,13 +24,9 @@ export default {
     SettingsHeader,
   },
   props: {
-    headerTitle: { type: String, default: '' },
-    headerButtonText: { type: String, default: '' },
-    icon: { type: String, default: '' },
-    keepAlive: {
-      type: Boolean,
-      default: true,
-    },
+    headerTitle: String,
+    headerButtonText: String,
+    icon: String,
     newButtonRoutes: {
       type: Array,
       default: () => [],
@@ -44,10 +38,6 @@ export default {
     backUrl: {
       type: [String, Object],
       default: '',
-    },
-    showSidemenuIcon: {
-      type: Boolean,
-      default: true,
     },
   },
   data() {

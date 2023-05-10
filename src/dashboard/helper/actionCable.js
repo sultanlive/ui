@@ -1,6 +1,6 @@
 import AuthAPI from '../api/auth';
 import BaseActionCableConnector from '../../shared/helpers/BaseActionCableConnector';
-import DashboardAudioNotificationHelper from './AudioAlerts/DashboardAudioNotificationHelper';
+import { newMessageNotification } from 'shared/helpers/AudioNotificationHelper';
 
 class ActionCableConnector extends BaseActionCableConnector {
   constructor(app, pubsubToken) {
@@ -19,46 +19,8 @@ class ActionCableConnector extends BaseActionCableConnector {
       'conversation.typing_off': this.onTypingOff,
       'conversation.contact_changed': this.onConversationContactChange,
       'presence.update': this.onPresenceUpdate,
-      'contact.deleted': this.onContactDelete,
-      'contact.updated': this.onContactUpdate,
-      'conversation.mentioned': this.onConversationMentioned,
-      'notification.created': this.onNotificationCreated,
-      'first.reply.created': this.onFirstReplyCreated,
-      'conversation.read': this.onConversationRead,
-      'conversation.updated': this.onConversationUpdated,
-      'account.cache_invalidated': this.onCacheInvalidate,
     };
   }
-
-  onReconnect = () => {
-    this.syncActiveConversationMessages();
-  };
-
-  onDisconnected = () => {
-    this.setActiveConversationLastMessageId();
-  };
-
-  setActiveConversationLastMessageId = () => {
-    const {
-      params: { conversation_id },
-    } = this.app.$route;
-    if (conversation_id) {
-      this.app.$store.dispatch('setConversationLastMessageId', {
-        conversationId: Number(conversation_id),
-      });
-    }
-  };
-
-  syncActiveConversationMessages = () => {
-    const {
-      params: { conversation_id },
-    } = this.app.$route;
-    if (conversation_id) {
-      this.app.$store.dispatch('syncActiveConversationMessages', {
-        conversationId: Number(conversation_id),
-      });
-    }
-  };
 
   isAValidEvent = data => {
     return this.app.$store.getters.getCurrentAccountId === data.account_id;
@@ -71,7 +33,7 @@ class ActionCableConnector extends BaseActionCableConnector {
   onPresenceUpdate = data => {
     this.app.$store.dispatch('contacts/updatePresence', data.contacts);
     this.app.$store.dispatch('agents/updatePresence', data.users);
-    this.app.$store.dispatch('setCurrentUserAvailability', data.users);
+    this.app.$store.dispatch('setCurrentUserAvailabilityStatus', data.users);
   };
 
   onConversationContactChange = payload => {
@@ -98,33 +60,16 @@ class ActionCableConnector extends BaseActionCableConnector {
     this.fetchConversationStats();
   };
 
-  onConversationRead = data => {
-    this.app.$store.dispatch('updateConversation', data);
-  };
-
   onLogout = () => AuthAPI.logout();
 
   onMessageCreated = data => {
-    const {
-      conversation: { last_activity_at: lastActivityAt },
-      conversation_id: conversationId,
-    } = data;
-    DashboardAudioNotificationHelper.onNewMessage(data);
+    newMessageNotification(data);
     this.app.$store.dispatch('addMessage', data);
-    this.app.$store.dispatch('updateConversationLastActivity', {
-      lastActivityAt,
-      conversationId,
-    });
   };
 
   onReload = () => window.location.reload();
 
   onStatusChange = data => {
-    this.app.$store.dispatch('updateConversation', data);
-    this.fetchConversationStats();
-  };
-
-  onConversationUpdated = data => {
     this.app.$store.dispatch('updateConversation', data);
     this.fetchConversationStats();
   };
@@ -150,10 +95,6 @@ class ActionCableConnector extends BaseActionCableConnector {
     });
   };
 
-  onConversationMentioned = data => {
-    this.app.$store.dispatch('addMentions', data);
-  };
-
   clearTimer = conversationId => {
     const timerEvent = this.CancelTyping[conversationId];
 
@@ -173,39 +114,18 @@ class ActionCableConnector extends BaseActionCableConnector {
 
   fetchConversationStats = () => {
     bus.$emit('fetch_conversation_stats');
-    bus.$emit('fetch_overview_reports');
-  };
-
-  onContactDelete = data => {
-    this.app.$store.dispatch(
-      'contacts/deleteContactThroughConversations',
-      data.id
-    );
-    this.fetchConversationStats();
-  };
-
-  onContactUpdate = data => {
-    this.app.$store.dispatch('contacts/updateContact', data);
-  };
-
-  onNotificationCreated = data => {
-    this.app.$store.dispatch('notifications/addNotification', data);
-  };
-
-  onFirstReplyCreated = () => {
-    bus.$emit('fetch_overview_reports');
-  };
-
-  onCacheInvalidate = data => {
-    const keys = data.cache_keys;
-    this.app.$store.dispatch('labels/revalidate', { newKey: keys.label });
-    this.app.$store.dispatch('inboxes/revalidate', { newKey: keys.inbox });
-    this.app.$store.dispatch('teams/revalidate', { newKey: keys.team });
   };
 }
 
 export default {
-  init(pubsubToken) {
-    return new ActionCableConnector(window.WOOT, pubsubToken);
+  init() {
+    if (AuthAPI.isLoggedIn()) {
+      const actionCable = new ActionCableConnector(
+        window.WOOT,
+        AuthAPI.getPubSubToken()
+      );
+      return actionCable;
+    }
+    return null;
   },
 };

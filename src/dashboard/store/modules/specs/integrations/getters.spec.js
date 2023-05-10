@@ -5,26 +5,14 @@ describe('#getters', () => {
     const state = {
       records: [
         {
-          id: 'test1',
+          id: 1,
           name: 'test1',
           logo: 'test',
           enabled: true,
         },
         {
-          id: 'test2',
+          id: 2,
           name: 'test2',
-          logo: 'test',
-          enabled: true,
-        },
-        {
-          id: 'dyte',
-          name: 'dyte',
-          logo: 'test',
-          enabled: true,
-        },
-        {
-          id: 'dialogflow',
-          name: 'dialogflow',
           logo: 'test',
           enabled: true,
         },
@@ -32,13 +20,13 @@ describe('#getters', () => {
     };
     expect(getters.getIntegrations(state)).toEqual([
       {
-        id: 'test1',
+        id: 1,
         name: 'test1',
         logo: 'test',
         enabled: true,
       },
       {
-        id: 'test2',
+        id: 2,
         name: 'test2',
         logo: 'test',
         enabled: true,
@@ -50,14 +38,8 @@ describe('#getters', () => {
     const state = {
       records: [
         {
-          id: 'test1',
+          id: 1,
           name: 'test1',
-          logo: 'test',
-          enabled: true,
-        },
-        {
-          id: 'dyte',
-          name: 'dyte',
           logo: 'test',
           enabled: true,
         },
@@ -70,12 +52,6 @@ describe('#getters', () => {
       ],
     };
     expect(getters.getAppIntegrations(state)).toEqual([
-      {
-        id: 'dyte',
-        name: 'dyte',
-        logo: 'test',
-        enabled: true,
-      },
       {
         id: 'dialogflow',
         name: 'test2',

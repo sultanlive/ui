@@ -4,12 +4,12 @@ class CampaignTimer {
     this.campaignTimers = [];
   }
 
-  initTimers = ({ campaigns }, websiteToken) => {
+  initTimers = ({ campaigns }) => {
     this.clearTimers();
     campaigns.forEach(campaign => {
       const { timeOnPage, id: campaignId } = campaign;
       this.campaignTimers[campaignId] = setTimeout(() => {
-        store.dispatch('campaign/startCampaign', { campaignId, websiteToken });
+        store.dispatch('campaign/startCampaign', { campaignId });
       }, timeOnPage * 1000);
     });
   };

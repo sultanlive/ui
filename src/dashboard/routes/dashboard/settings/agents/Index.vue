@@ -2,8 +2,8 @@
   <div class="column content-box">
     <woot-button
       color-scheme="success"
-      class-names="button--fixed-top"
-      icon="add-circle"
+      class-names="button--fixed-right-top"
+      icon="ion-android-add-circle"
       @click="openAddPopup()"
     >
       {{ $t('AGENT_MGMT.HEADER_BTN_TXT') }}
@@ -35,9 +35,7 @@
                 </td>
                 <!-- Agent Name + Email -->
                 <td>
-                  <span class="agent-name">
-                    {{ agent.name }}
-                  </span>
+                  <span class="agent-name">{{ agent.name }}</span>
                   <span>{{ agent.email }}</span>
                 </td>
                 <!-- Agent Role + Verification Status -->
@@ -59,25 +57,25 @@
                   <div class="button-wrapper">
                     <woot-button
                       v-if="showEditAction(agent)"
-                      v-tooltip.top="$t('AGENT_MGMT.EDIT.BUTTON_TEXT')"
-                      variant="smooth"
-                      size="tiny"
+                      variant="link"
                       color-scheme="secondary"
-                      icon="edit"
+                      icon="ion-edit"
                       class-names="grey-btn"
                       @click="openEditPopup(agent)"
-                    />
+                    >
+                      {{ $t('AGENT_MGMT.EDIT.BUTTON_TEXT') }}
+                    </woot-button>
                     <woot-button
                       v-if="showDeleteAction(agent)"
-                      v-tooltip.top="$t('AGENT_MGMT.DELETE.BUTTON_TEXT')"
-                      variant="smooth"
-                      color-scheme="alert"
-                      size="tiny"
-                      icon="dismiss-circle"
+                      variant="link"
+                      color-scheme="secondary"
+                      icon="ion-close-circled"
                       class-names="grey-btn"
                       :is-loading="loading[agent.id]"
                       @click="openDeletePopup(agent, index)"
-                    />
+                    >
+                      {{ $t('AGENT_MGMT.DELETE.BUTTON_TEXT') }}
+                    </woot-button>
                   </div>
                 </td>
               </tr>
@@ -87,7 +85,7 @@
       </div>
       <div class="small-4 columns">
         <span
-          v-dompurify-html="
+          v-html="
             useInstallationName(
               $t('AGENT_MGMT.SIDEBAR_TXT'),
               globalConfig.installationName
@@ -108,7 +106,6 @@
         :name="currentAgent.name"
         :type="currentAgent.role"
         :email="currentAgent.email"
-        :availability="currentAgent.availability_status"
         :on-close="hideEditPopup"
       />
     </woot-modal>
@@ -118,8 +115,7 @@
       :on-close="closeDeletePopup"
       :on-confirm="confirmDeletion"
       :title="$t('AGENT_MGMT.DELETE.CONFIRM.TITLE')"
-      :message="$t('AGENT_MGMT.DELETE.CONFIRM.MESSAGE')"
-      :message-value="deleteMessage"
+      :message="deleteMessage"
       :confirm-text="deleteConfirmText"
       :reject-text="deleteRejectText"
     />
@@ -169,7 +165,9 @@ export default {
       }`;
     },
     deleteMessage() {
-      return ` ${this.currentAgent.name}?`;
+      return `${this.$t('AGENT_MGMT.DELETE.CONFIRM.MESSAGE')} ${
+        this.currentAgent.name
+      } ?`;
     },
   },
   mounted() {

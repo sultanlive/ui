@@ -1,5 +1,5 @@
 <template>
-  <div class="user-avatar" :class="size" :style="getBgImage" />
+  <div class="user-avatar" :class="size" :style="getBgImage"></div>
 </template>
 <script>
 /**
@@ -11,11 +11,9 @@ export default {
   props: {
     src: {
       type: String,
-      default: '',
     },
     size: {
       type: String,
-      default: '',
     },
   },
   computed: {

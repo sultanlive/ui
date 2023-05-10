@@ -1,13 +1,22 @@
 export const buildSearchParamsWithLocale = search => {
   const locale = window.WOOT_WIDGET.$root.$i18n.locale;
-  const params = new URLSearchParams(search);
-  params.append('locale', locale);
-
-  return `?${params}`;
+  if (search) {
+    search = `${search}&locale=${locale}`;
+  } else {
+    search = `?locale=${locale}`;
+  }
+  return search;
 };
 
 export const getLocale = (search = '') => {
-  return new URLSearchParams(search).get('locale');
+  const searchParamKeyValuePairs = search.split('&');
+  return searchParamKeyValuePairs.reduce((acc, keyValuePair) => {
+    const [key, value] = keyValuePair.split('=');
+    if (key === 'locale') {
+      return value;
+    }
+    return acc;
+  }, undefined);
 };
 
 export const buildPopoutURL = ({
@@ -16,10 +25,5 @@ export const buildPopoutURL = ({
   websiteToken,
   locale,
 }) => {
-  const popoutUrl = new URL('/widget', origin);
-  popoutUrl.searchParams.append('cw_conversation', conversationCookie);
-  popoutUrl.searchParams.append('website_token', websiteToken);
-  popoutUrl.searchParams.append('locale', locale);
-
-  return popoutUrl.toString();
+  return `${origin}/widget?cw_conversation=${conversationCookie}&website_token=${websiteToken}&locale=${locale}`;
 };

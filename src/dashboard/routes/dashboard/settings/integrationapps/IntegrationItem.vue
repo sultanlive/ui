@@ -3,17 +3,12 @@
     <div class="integration--image">
       <img :src="'/dashboard/images/integrations/' + integrationLogo" />
     </div>
-    <div class="integration--type column">
+    <div class="column">
       <h3 class="integration--title">
         {{ integrationName }}
       </h3>
-      <p>
-        {{
-          useInstallationName(
-            integrationDescription,
-            globalConfig.installationName
-          )
-        }}
+      <p class="integration--description">
+        {{ integrationDescription }}
       </p>
     </div>
     <div class="small-2 column button-wrap">
@@ -27,7 +22,7 @@
           )
         "
       >
-        <woot-button icon="settings">
+        <woot-button icon="ion-gear-b">
           {{ $t('INTEGRATION_APPS.CONFIGURE') }}
         </woot-button>
       </router-link>
@@ -38,17 +33,15 @@
 import { mapGetters } from 'vuex';
 import { frontendURL } from '../../../../helper/URLHelper';
 import WootLabel from 'dashboard/components/ui/Label';
-import globalConfigMixin from 'shared/mixins/globalConfigMixin';
 
 export default {
   components: {
     WootLabel,
   },
-  mixins: [globalConfigMixin],
   props: {
     integrationId: {
-      type: [String, Number],
-      required: true,
+      type: String,
+      default: '',
     },
     integrationLogo: {
       type: String,
@@ -68,10 +61,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters({
-      accountId: 'getCurrentAccountId',
-      globalConfig: 'globalConfig/get',
-    }),
+    ...mapGetters({ accountId: 'getCurrentAccountId' }),
     labelText() {
       return this.integrationEnabled
         ? this.$t('INTEGRATION_APPS.STATUS.ENABLED')

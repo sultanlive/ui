@@ -7,13 +7,7 @@
       @click="onBackDropClick"
     >
       <div :class="modalContainerClassName" @click.stop>
-        <woot-button
-          color-scheme="secondary"
-          icon="dismiss"
-          variant="clear"
-          class="modal--close"
-          @click="close"
-        />
+        <i class="ion-android-close modal--close" @click="close"></i>
         <slot />
       </div>
     </div>
@@ -40,19 +34,14 @@ export default {
       type: String,
       default: 'centered',
     },
-    size: {
-      type: String,
-      default: '',
-    },
   },
   computed: {
     modalContainerClassName() {
-      let className = 'modal-container skip-context-menu';
+      let className = 'modal-container';
       if (this.fullWidth) {
         return `${className} modal-container--full-width`;
       }
-
-      return `${className} ${this.size}`;
+      return className;
     },
     modalClassName() {
       const modalClassNameMap = {
@@ -60,14 +49,12 @@ export default {
         'right-aligned': 'right-aligned',
       };
 
-      return `modal-mask skip-context-menu ${modalClassNameMap[
-        this.modalType
-      ] || ''}`;
+      return `modal-mask ${modalClassNameMap[this.modalType] || ''}`;
     },
   },
   mounted() {
     document.addEventListener('keydown', e => {
-      if (this.show && e.code === 'Escape') {
+      if (this.show && e.keyCode === 27) {
         this.onClose();
       }
     });
@@ -103,8 +90,5 @@ export default {
     height: 100%;
     width: 48rem;
   }
-}
-.modal-big {
-  width: 60%;
 }
 </style>

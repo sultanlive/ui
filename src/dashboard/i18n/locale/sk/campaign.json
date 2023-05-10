@@ -2,14 +2,11 @@
   "CAMPAIGN": {
     "HEADER": "Campaigns",
     "SIDEBAR_TXT": "Proactive messages allow the customer to send outbound messages to their contacts which would trigger more conversations. Click on <b>Add Campaign</b> to create a new campaign. You can also edit or delete an existing campaign by clicking on the Edit or Delete button.",
-    "HEADER_BTN_TXT": {
-      "ONE_OFF": "Create a one off campaign",
-      "ONGOING": "Create a ongoing campaign"
-    },
+    "HEADER_BTN_TXT": "Create a campaign",
     "ADD": {
       "TITLE": "Create a campaign",
       "DESC": "Proactive messages allow the customer to send outbound messages to their contacts which would trigger more conversations.",
-      "CANCEL_BUTTON_TEXT": "Zrušiť",
+      "CANCEL_BUTTON_TEXT": "Cancel",
       "CREATE_BUTTON_TEXT": "Create",
       "FORM": {
         "TITLE": {
@@ -28,13 +25,8 @@
           "PLACEHOLDER": "Select the customer labels",
           "ERROR": "Audience is required"
         },
-        "INBOX": {
-          "LABEL": "Select Inbox",
-          "PLACEHOLDER": "Select Inbox",
-          "ERROR": "Inbox is required"
-        },
         "MESSAGE": {
-          "LABEL": "Správa",
+          "LABEL": "Message",
           "PLACEHOLDER": "Please enter the message of campaign",
           "ERROR": "Message is required"
         },
@@ -54,7 +46,6 @@
           "ERROR": "Time on page is required"
         },
         "ENABLED": "Enable campaign",
-        "TRIGGER_ONLY_BUSINESS_HOURS": "Trigger only during business hours",
         "SUBMIT": "Add Campaign"
       },
       "API": {
@@ -63,12 +54,12 @@
       }
     },
     "DELETE": {
-      "BUTTON_TEXT": "Vymazať",
+      "BUTTON_TEXT": "Delete",
       "CONFIRM": {
-        "TITLE": "Potvrdiť vymazanie",
+        "TITLE": "Confirm Deletion",
         "MESSAGE": "Are you sure to delete?",
-        "YES": "Áno, vymazať ",
-        "NO": "Nie, ponechať "
+        "YES": "Yes, Delete ",
+        "NO": "No, Keep "
       },
       "API": {
         "SUCCESS_MESSAGE": "Campaign deleted successfully",
@@ -88,8 +79,7 @@
       "404": "There are no campaigns created for this inbox.",
       "TABLE_HEADER": {
         "TITLE": "Title",
-        "MESSAGE": "Správa",
-        "INBOX": "Schránka",
+        "MESSAGE": "Message",
         "STATUS": "Status",
         "SENDER": "Sender",
         "URL": "URL",
@@ -98,29 +88,19 @@
         "CREATED_AT": "Created at"
       },
       "BUTTONS": {
-        "ADD": "Pridať",
-        "EDIT": "Upraviť",
-        "DELETE": "Vymazať"
+        "ADD": "Add",
+        "EDIT": "Edit",
+        "DELETE": "Delete"
       },
       "STATUS": {
-        "ENABLED": "Zapnuté",
-        "DISABLED": "Vypnuté",
+        "ENABLED": "Enabled",
+        "DISABLED": "Disabled",
         "COMPLETED": "Completed",
         "ACTIVE": "Active"
       },
       "SENDER": {
         "BOT": "Bot"
       }
-    },
-    "ONE_OFF": {
-      "HEADER": "One off campaigns",
-      "404": "There are no one off campaigns created",
-      "INBOXES_NOT_FOUND": "Please create an sms inbox and start adding campaigns"
-    },
-    "ONGOING": {
-      "HEADER": "Ongoing campaigns",
-      "404": "There are no ongoing campaigns created",
-      "INBOXES_NOT_FOUND": "Please create an website inbox and start adding campaigns"
     }
   }
 }

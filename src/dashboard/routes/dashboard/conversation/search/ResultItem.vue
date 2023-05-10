@@ -1,8 +1,8 @@
 <template>
   <div class="search-result" @click="onClick">
     <div class="result-header">
-      <div class="conversation--block">
-        <fluent-icon icon="chat" class="icon--conversation-search-item" />
+      <div class="message">
+        <i class="ion-ios-chatboxes-outline" />
         <div class="conversation">
           <div class="user-wrap">
             <div class="name-wrap">
@@ -128,20 +128,20 @@ export default {
     .timestamp {
       color: var(--white);
     }
-    .icon--conversation-search-item {
+    .ion-ios-chatboxes-outline {
       color: var(--white);
     }
   }
 }
 
-.conversation--block {
-  align-items: center;
+.message {
   display: flex;
 }
 
-.icon--conversation-search-item {
+.ion-ios-chatboxes-outline {
   align-items: center;
   display: flex;
+  font-size: var(--font-size-large);
   color: var(--w-500);
 }
 

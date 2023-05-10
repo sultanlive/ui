@@ -7,25 +7,20 @@ export default {
         this.inboxId
       );
     },
-    ...mapGetters({ currentUser: 'getCurrentUser' }),
-    isAgentSelected() {
-      return this.currentChat?.meta?.assignee;
-    },
+    ...mapGetters({
+      currentUser: 'getCurrentUser',
+    }),
     agentsList() {
       const agents = this.assignableAgents || [];
       return [
-        ...(this.isAgentSelected
-          ? [
-              {
-                confirmed: true,
-                name: 'None',
-                id: 0,
-                role: 'agent',
-                account_id: 0,
-                email: 'None',
-              },
-            ]
-          : []),
+        {
+          confirmed: true,
+          name: 'None',
+          id: 0,
+          role: 'agent',
+          account_id: 0,
+          email: 'None',
+        },
         ...agents,
       ].map(item =>
         item.id === this.currentUser.id

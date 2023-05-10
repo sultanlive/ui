@@ -1,10 +1,6 @@
 <template>
   <div class="chat-bubble-wrap">
-    <button
-      class="chat-bubble agent"
-      :class="$dm('bg-white', 'dark:bg-slate-50')"
-      @click="onClickMessage"
-    >
+    <button class="chat-bubble agent" @click="onClickMessage">
       <div v-if="showSender" class="row--agent-block">
         <thumbnail
           :src="avatarUrl"
@@ -15,10 +11,7 @@
         <span class="agent--name">{{ agentName }}</span>
         <span class="company--name"> {{ companyName }}</span>
       </div>
-      <div
-        v-dompurify-html="formatMessage(message, false)"
-        class="message-content"
-      />
+      <div class="message-content" v-html="formatMessage(message, false)"></div>
     </button>
   </div>
 </template>
@@ -28,15 +21,10 @@ import messageFormatterMixin from 'shared/mixins/messageFormatterMixin';
 import Thumbnail from 'dashboard/components/widgets/Thumbnail';
 import configMixin from '../mixins/configMixin';
 import { isEmptyObject } from 'widget/helpers/utils';
-import {
-  ON_CAMPAIGN_MESSAGE_CLICK,
-  ON_UNREAD_MESSAGE_CLICK,
-} from '../constants/widgetBusEvents';
-import darkModeMixin from 'widget/mixins/darkModeMixin';
 export default {
   name: 'UnreadMessage',
   components: { Thumbnail },
-  mixins: [messageFormatterMixin, configMixin, darkModeMixin],
+  mixins: [messageFormatterMixin, configMixin],
   props: {
     message: {
       type: String,
@@ -78,9 +66,6 @@ export default {
         const { available_name: availableName, name } = this.sender;
         return availableName || name;
       }
-      if (this.useInboxAvatarForBot) {
-        return this.channelConfig.websiteName;
-      }
       return this.$t('UNREAD_VIEW.BOT');
     },
     availabilityStatus() {
@@ -97,9 +82,7 @@ export default {
     },
     onClickMessage() {
       if (this.campaignId) {
-        bus.$emit(ON_CAMPAIGN_MESSAGE_CLICK, this.campaignId);
-      } else {
-        bus.$emit(ON_UNREAD_MESSAGE_CLICK);
+        bus.$emit('on-campaign-view-clicked', this.campaignId);
       }
     },
   },

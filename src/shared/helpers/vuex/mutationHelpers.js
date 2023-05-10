@@ -37,22 +37,12 @@ export const updateAttributes = (state, data) => {
 export const updatePresence = (state, data) => {
   state.records.forEach((element, index) => {
     const availabilityStatus = data[element.id];
-    Vue.set(
-      state.records[index],
-      'availability_status',
-      availabilityStatus || 'offline'
-    );
+    if (availabilityStatus) {
+      Vue.set(state.records[index], 'availability_status', availabilityStatus);
+    } else {
+      Vue.delete(state.records[index], 'availability_status');
+    }
   });
-};
-
-export const updateSingleRecordPresence = (
-  records,
-  { id, availabilityStatus }
-) => {
-  const [selectedRecord] = records.filter(record => record.id === Number(id));
-  if (selectedRecord) {
-    Vue.set(selectedRecord, 'availability_status', availabilityStatus);
-  }
 };
 
 export const destroy = (state, id) => {

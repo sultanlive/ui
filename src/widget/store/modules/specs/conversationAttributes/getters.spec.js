@@ -4,11 +4,11 @@ describe('#getters', () => {
   it('getConversationParams', () => {
     const state = {
       id: 1,
-      status: 'pending',
+      status: 'bot',
     };
     expect(getters.getConversationParams(state)).toEqual({
       id: 1,
-      status: 'pending',
+      status: 'bot',
     });
   });
 });

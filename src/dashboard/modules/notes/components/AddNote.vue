@@ -1,64 +1,45 @@
 <template>
   <div class="card">
-    <woot-message-editor
-      v-model="noteContent"
-      class="input--note"
+    <textarea
+      v-model="inputText"
       :placeholder="$t('NOTES.ADD.PLACEHOLDER')"
-      :enable-suggestions="false"
+      class="input--note"
+      @keydown.enter.shift.exact="onAdd"
     />
     <div class="footer">
       <woot-button
+        size="tiny"
         color-scheme="warning"
         :title="$t('NOTES.ADD.TITLE')"
         :is-disabled="buttonDisabled"
         @click="onAdd"
       >
-        {{ $t('NOTES.ADD.BUTTON') }} (⌘⏎)
+        {{ $t('NOTES.ADD.BUTTON') }}
       </woot-button>
     </div>
   </div>
 </template>
 
 <script>
-import WootMessageEditor from 'dashboard/components/widgets/WootWriter/Editor';
-import { hasPressedCommandAndEnter } from 'shared/helpers/KeyboardHelpers';
 export default {
-  components: {
-    WootMessageEditor,
-  },
-
   data() {
     return {
-      noteContent: '',
+      inputText: '',
     };
   },
 
   computed: {
     buttonDisabled() {
-      return this.noteContent === '';
+      return this.inputText === '';
     },
-  },
-
-  mounted() {
-    document.addEventListener('keydown', this.onMetaEnter);
-  },
-
-  beforeDestroy() {
-    document.removeEventListener('keydown', this.onMetaEnter);
   },
 
   methods: {
-    onMetaEnter(e) {
-      if (hasPressedCommandAndEnter(e)) {
-        e.preventDefault();
-        this.onAdd();
-      }
-    },
     onAdd() {
-      if (this.noteContent !== '') {
-        this.$emit('add', this.noteContent);
+      if (this.inputText !== '') {
+        this.$emit('add', this.inputText);
       }
-      this.noteContent = '';
+      this.inputText = '';
     },
   },
 };
@@ -66,14 +47,12 @@ export default {
 
 <style lang="scss" scoped>
 .input--note {
-  &::v-deep .ProseMirror-menubar {
-    padding: 0;
-    margin-top: var(--space-minus-small);
-  }
-
-  &::v-deep .ProseMirror-woot-style {
-    max-height: 36rem;
-  }
+  font-size: var(--font-size-mini);
+  border-color: transparent;
+  margin-bottom: var(--space-small);
+  padding: 0;
+  resize: none;
+  min-height: var(--space-larger);
 }
 
 .footer {

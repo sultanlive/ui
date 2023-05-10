@@ -2,8 +2,8 @@
   <div class="column content-box">
     <woot-button
       color-scheme="success"
-      class-names="button--fixed-top"
-      icon="add-circle"
+      class-names="button--fixed-right-top"
+      icon="ion-android-add-circle"
       @click="openAddPopup()"
     >
       {{ $t('CANNED_MGMT.HEADER_BTN_TXT') }}
@@ -46,27 +46,28 @@
                 {{ cannedItem.short_code }}
               </td>
               <!-- Content -->
-              <td class="wrap-break-words">{{ cannedItem.content }}</td>
+              <td>{{ cannedItem.content }}</td>
               <!-- Action Buttons -->
               <td class="button-wrapper">
                 <woot-button
-                  v-tooltip.top="$t('CANNED_MGMT.EDIT.BUTTON_TEXT')"
-                  variant="smooth"
-                  size="tiny"
+                  variant="link"
                   color-scheme="secondary"
-                  icon="edit"
+                  icon="ion-edit"
+                  class-names="grey-btn"
                   @click="openEditPopup(cannedItem)"
-                />
+                >
+                  {{ $t('CANNED_MGMT.EDIT.BUTTON_TEXT') }}
+                </woot-button>
                 <woot-button
-                  v-tooltip.top="$t('CANNED_MGMT.DELETE.BUTTON_TEXT')"
-                  variant="smooth"
-                  color-scheme="alert"
-                  size="tiny"
-                  icon="dismiss-circle"
+                  variant="link"
+                  color-scheme="secondary"
+                  icon="ion-close-circled"
                   class-names="grey-btn"
                   :is-loading="loading[cannedItem.id]"
                   @click="openDeletePopup(cannedItem, index)"
-                />
+                >
+                  {{ $t('CANNED_MGMT.DELETE.BUTTON_TEXT') }}
+                </woot-button>
               </td>
             </tr>
           </tbody>
@@ -74,7 +75,7 @@
       </div>
 
       <div class="small-4 columns">
-        <span v-dompurify-html="$t('CANNED_MGMT.SIDEBAR_TXT')" />
+        <span v-html="$t('CANNED_MGMT.SIDEBAR_TXT')"></span>
       </div>
     </div>
     <!-- Add Agent -->
@@ -99,8 +100,7 @@
       :on-close="closeDeletePopup"
       :on-confirm="confirmDeletion"
       :title="$t('CANNED_MGMT.DELETE.CONFIRM.TITLE')"
-      :message="$t('CANNED_MGMT.DELETE.CONFIRM.MESSAGE')"
-      :message-value="deleteMessage"
+      :message="deleteMessage"
       :confirm-text="deleteConfirmText"
       :reject-text="deleteRejectText"
     />
@@ -145,7 +145,9 @@ export default {
       }`;
     },
     deleteMessage() {
-      return ` ${this.selectedResponse.short_code}?`;
+      return `${this.$t('CANNED_MGMT.DELETE.CONFIRM.MESSAGE')} ${
+        this.selectedResponse.short_code
+      } ?`;
     },
   },
   mounted() {
@@ -208,9 +210,5 @@ export default {
 <style scoped>
 .short-code {
   width: 14rem;
-}
-.wrap-break-words {
-  word-break: break-all;
-  white-space: normal;
 }
 </style>

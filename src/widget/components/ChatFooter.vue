@@ -1,32 +1,30 @@
 <template>
-  <footer
-    v-if="!hideReplyBox"
-    class="shadow-sm bg-white mb-1 z-50 relative"
-    :class="{ 'rounded-lg': !isWidgetStyleFlat }"
-  >
-    <chat-input-wrap
-      :on-send-message="handleSendMessage"
-      :on-send-attachment="handleSendAttachment"
-    />
-  </footer>
-  <div v-else>
-    <custom-button
-      class="font-medium"
-      block
-      :bg-color="widgetColor"
-      :text-color="textColor"
-      @click="startNewConversation"
-    >
-      {{ $t('START_NEW_CONVERSATION') }}
-    </custom-button>
-    <custom-button
-      v-if="showEmailTranscriptButton"
-      type="clear"
-      class="font-normal"
-      @click="sendTranscript"
-    >
-      {{ $t('EMAIL_TRANSCRIPT.BUTTON_TEXT') }}
-    </custom-button>
+  <div>
+    <footer v-if="!hideReplyBox" class="footer">
+      <ChatInputWrap
+        :on-send-message="handleSendMessage"
+        :on-send-attachment="handleSendAttachment"
+      />
+    </footer>
+    <div v-else>
+      <custom-button
+        class="font-medium"
+        block
+        :bg-color="widgetColor"
+        :text-color="textColor"
+        @click="startNewConversation"
+      >
+        {{ $t('START_NEW_CONVERSATION') }}
+      </custom-button>
+      <custom-button
+        v-if="showEmailTranscriptButton"
+        type="clear"
+        class="font-normal"
+        @click="sendTranscript"
+      >
+        {{ $t('EMAIL_TRANSCRIPT.BUTTON_TEXT') }}
+      </custom-button>
+    </div>
   </div>
 </template>
 
@@ -37,13 +35,12 @@ import CustomButton from 'shared/components/Button';
 import ChatInputWrap from 'widget/components/ChatInputWrap.vue';
 import { BUS_EVENTS } from 'shared/constants/busEvents';
 import { sendEmailTranscript } from 'widget/api/conversation';
-import routerMixin from 'widget/mixins/routerMixin';
+
 export default {
   components: {
     ChatInputWrap,
     CustomButton,
   },
-  mixins: [routerMixin],
   props: {
     msg: {
       type: String,
@@ -54,17 +51,17 @@ export default {
     ...mapGetters({
       conversationAttributes: 'conversationAttributes/getConversationParams',
       widgetColor: 'appConfig/getWidgetColor',
-      conversationSize: 'conversation/getConversationSize',
+      getConversationSize: 'conversation/getConversationSize',
       currentUser: 'contacts/getCurrentUser',
-      isWidgetStyleFlat: 'appConfig/isWidgetStyleFlat',
+      webChannelConfig: 'appConfig/getWebChannelConfig',
     }),
     textColor() {
       return getContrastingTextColor(this.widgetColor);
     },
     hideReplyBox() {
-      const { allowMessagesAfterResolved } = window.chatwootWebChannel;
+      const { csatSurveyEnabled } = this.webChannelConfig;
       const { status } = this.conversationAttributes;
-      return !allowMessagesAfterResolved && status === 'resolved';
+      return csatSurveyEnabled && status === 'resolved';
     },
     showEmailTranscriptButton() {
       return this.currentUser && this.currentUser.email;
@@ -81,11 +78,12 @@ export default {
       'clearConversationAttributes',
     ]),
     async handleSendMessage(content) {
+      const conversationSize = this.getConversationSize;
       await this.sendMessage({
         content,
       });
       // Update conversation attributes on new conversation
-      if (this.conversationSize === 0) {
+      if (conversationSize === 0) {
         this.getAttributes();
       }
     },
@@ -95,7 +93,7 @@ export default {
     startNewConversation() {
       this.clearConversations();
       this.clearConversationAttributes();
-      this.replaceRoute('prechat-form');
+      window.bus.$emit(BUS_EVENTS.START_NEW_CONVERSATION);
     },
     async sendTranscript() {
       const { email } = this.currentUser;
@@ -118,8 +116,20 @@ export default {
   },
 };
 </script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 @import '~widget/assets/scss/variables.scss';
+@import '~widget/assets/scss/mixins.scss';
+
+.footer {
+  background: $color-white;
+  box-sizing: border-box;
+  padding: $space-small $space-slab;
+  width: 100%;
+  border-radius: 7px;
+  @include shadow-big;
+}
 
 .branding {
   align-items: center;

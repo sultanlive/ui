@@ -1,8 +1,7 @@
 import * as MutationHelpers from 'shared/helpers/vuex/mutationHelpers';
 import types from '../mutation-types';
 import CampaignsAPI from '../../api/campaigns';
-import AnalyticsHelper from '../../helper/AnalyticsHelper';
-import { CAMPAIGNS_EVENTS } from '../../helper/AnalyticsHelper/events';
+import InboxesAPI from '../../api/inboxes';
 
 export const state = {
   records: [],
@@ -16,21 +15,16 @@ export const getters = {
   getUIFlags(_state) {
     return _state.uiFlags;
   },
-  getCampaigns: _state => campaignType => {
-    return _state.records.filter(
-      record => record.campaign_type === campaignType
-    );
-  },
-  getAllCampaigns: _state => {
+  getCampaigns(_state) {
     return _state.records;
   },
 };
 
 export const actions = {
-  get: async function getCampaigns({ commit }) {
+  get: async function getCampaigns({ commit }, { inboxId }) {
     commit(types.SET_CAMPAIGN_UI_FLAG, { isFetching: true });
     try {
-      const response = await CampaignsAPI.get();
+      const response = await InboxesAPI.getCampaigns(inboxId);
       commit(types.SET_CAMPAIGNS, response.data);
     } catch (error) {
       // Ignore error
@@ -53,7 +47,6 @@ export const actions = {
     commit(types.SET_CAMPAIGN_UI_FLAG, { isUpdating: true });
     try {
       const response = await CampaignsAPI.update(id, updateObj);
-      AnalyticsHelper.track(CAMPAIGNS_EVENTS.UPDATE_CAMPAIGN);
       commit(types.EDIT_CAMPAIGN, response.data);
     } catch (error) {
       throw new Error(error);
@@ -65,7 +58,6 @@ export const actions = {
     commit(types.SET_CAMPAIGN_UI_FLAG, { isDeleting: true });
     try {
       await CampaignsAPI.delete(id);
-      AnalyticsHelper.track(CAMPAIGNS_EVENTS.DELETE_CAMPAIGN);
       commit(types.DELETE_CAMPAIGN, id);
     } catch (error) {
       throw new Error(error);

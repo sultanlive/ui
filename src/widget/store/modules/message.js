@@ -1,4 +1,5 @@
 import MessageAPI from '../../api/message';
+import { refreshActionCableConnector } from '../../helpers/actionCable';
 
 const state = {
   uiFlags: {
@@ -12,15 +13,14 @@ export const getters = {
 
 export const actions = {
   update: async (
-    { commit, dispatch, getters: { getUIFlags: uiFlags } },
+    { commit, dispatch },
     { email, messageId, submittedValues }
   ) => {
-    if (uiFlags.isUpdating) {
-      return;
-    }
     commit('toggleUpdateStatus', true);
     try {
-      await MessageAPI.update({
+      const {
+        data: { contact: { pubsub_token: pubsubToken } = {} },
+      } = await MessageAPI.update({
         email,
         messageId,
         values: submittedValues,
@@ -37,6 +37,7 @@ export const actions = {
         { root: true }
       );
       dispatch('contacts/get', {}, { root: true });
+      refreshActionCableConnector(pubsubToken);
     } catch (error) {
       // Ignore error
     }
